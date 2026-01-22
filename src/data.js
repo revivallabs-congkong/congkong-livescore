@@ -1,13 +1,43 @@
-import { 
-  Trophy, Activity, Save, CheckCircle2, 
-  LogOut, ChevronRight, PenTool, 
-  Crown, MapPin, CalendarClock, Star,
-  X, Command, Sparkles, Lock, Key, Eye, EyeOff,
-  BarChart2, Play, Pause, Grid, Layers, ShieldCheck,
-  TrendingUp, Calculator, Users,
-  MonitorPlay, Unlock, Timer, AlertCircle, AlertTriangle, Check, Search,
-  Moon, Sun, Globe, Languages
-} from 'lucide-react';
+import {
+  Trophy,
+  Activity,
+  Save,
+  CheckCircle2,
+  LogOut,
+  ChevronRight,
+  PenTool,
+  Crown,
+  MapPin,
+  CalendarClock,
+  Star,
+  X,
+  Command,
+  Sparkles,
+  Lock,
+  Key,
+  Eye,
+  EyeOff,
+  BarChart2,
+  Play,
+  Pause,
+  Grid,
+  Layers,
+  ShieldCheck,
+  TrendingUp,
+  Calculator,
+  Users,
+  MonitorPlay,
+  Unlock,
+  Timer,
+  AlertCircle,
+  AlertTriangle,
+  Check,
+  Search,
+  Moon,
+  Sun,
+  Globe,
+  Languages,
+} from "lucide-react";
 
 /**
  * MULTI-LANGUAGE DICTIONARY
@@ -16,7 +46,8 @@ export const DICTIONARY = {
   ko: {
     app_title: "'25년 기술사업화",
     app_subtitle: "BM 아이디어 경진대회",
-    app_desc: "공정하고 투명한 심사를 위한 프리미엄 솔루션.\n현장 중심의 운영 최적화 시스템입니다.",
+    app_desc:
+      "공정하고 투명한 심사를 위한 프리미엄 솔루션.\n현장 중심의 운영 최적화 시스템입니다.",
     date_label: "일시",
     date_val: "2025. 12. 03 (수)",
     loc_label: "장소",
@@ -28,12 +59,12 @@ export const DICTIONARY = {
     admin_placeholder_pw: "비밀번호",
     btn_access: "대시보드 접속",
     err_auth: "접근 권한이 없습니다.",
-    
+
     mission_control: "Mission Control Center",
     system_status: "시스템 정상 가동 중",
     current_presenting: "현재 발표",
     mode_ceremony: "시상식 모드",
-    
+
     field_control: "현장 운영 통제",
     force_sync: "발표 팀 강제 지정 (Sync)",
     emergency_unlock: "심사 잠금 해제 (Emergency)",
@@ -44,14 +75,14 @@ export const DICTIONARY = {
     caution: "주의",
     btn_unlock: "해제",
     btn_lock: "잠금",
-    
+
     live_ranking: "LIVE RANKING (Max 110pts)",
     ranking_calc: "최고/최저 제외 평균 산출",
     rank: "순위",
     team: "TEAM",
     judge_progress: "심사 완료율",
     total_score: "종합 점수",
-    
+
     judge_mode: "Judge Mode",
     score_total: "총점 (Total)",
     submit: "제출하기",
@@ -61,32 +92,33 @@ export const DICTIONARY = {
     sign_placeholder: "서명을 입력해주세요",
     btn_cancel: "취소",
     btn_complete: "제출 완료",
-    
+
     confirm_title: "제출 확인",
     confirm_msg: "부여한 총점",
     confirm_warn_title: "주의: 0점 항목 있음",
     confirm_warn_desc: "항목이 0점입니다.",
     confirm_footer: "제출 후에도 언제든지 수정할 수 있습니다.",
     btn_recheck: "다시 검토",
-    
+
     toast_saved: "저장되었습니다.",
     status_saving: "저장 중...",
     status_saved: "저장됨",
-    
+
     ai_analysis: "AI 분석",
     ai_insight: "AI Insight",
-    ai_msg: "현재 '도전성' 항목은 높으나 '사업 실현가능성'에서 점수가 낮습니다. 구체적인 규제 해결 방안에 대한 피드백이 유효할 수 있습니다.",
+    ai_msg:
+      "현재 '도전성' 항목은 높으나 '사업 실현가능성'에서 점수가 낮습니다. 구체적인 규제 해결 방안에 대한 피드백이 유효할 수 있습니다.",
     comment_placeholder: "참가팀에 대한 심사 의견을 자유롭게 작성해주세요.",
-    
+
     detail_title: "심사 상세 현황",
     detail_total_judges: "총 심사위원",
     detail_completed: "제출 완료",
     not_submitted: "미제출",
     submitted: "제출완료",
-    
+
     final_score_label: "Final Score (Total 110)",
     grand_prix: "2025 Grand Prix",
-    
+
     // Team Management
     manage_teams: "참가팀 관리",
     btn_add_team: "팀 추가",
@@ -103,7 +135,7 @@ export const DICTIONARY = {
     msg_confirm_delete: "정말 삭제하시겠습니까?",
     msg_fill_required: "모든 필수 항목을 입력해주세요.",
     msg_csv_success: "팀 등록이 완료되었습니다.",
-    
+
     // Add Team Modal
     add_team_title: "새로운 팀 등록",
     label_team_name: "팀명",
@@ -113,7 +145,7 @@ export const DICTIONARY = {
     btn_save: "저장하기",
     label_category: "부문",
     label_time: "발표 시간",
-    
+
     // Judge Management
     manage_judges: "심사위원 관리",
     btn_add_judge: "심사위원 추가",
@@ -148,13 +180,16 @@ export const DICTIONARY = {
     // System Reset
     danger_zone: "위험 구역",
     btn_reset_all: "데이터 초기화",
-    msg_confirm_reset: "정말로 모든 데이터를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
-    msg_confirm_reset: "정말로 모든 데이터를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+    msg_confirm_reset:
+      "정말로 모든 데이터를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+    msg_confirm_reset:
+      "정말로 모든 데이터를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
     msg_reset_success: "시스템이 초기화되었습니다.",
-    
+
     // Secure Reset Modal
     reset_modal_title: "데이터 초기화 확인",
-    reset_modal_desc: "이 작업은 되돌릴 수 없습니다. 확인을 위해 관리자 비밀번호를 입력하세요.",
+    reset_modal_desc:
+      "이 작업은 되돌릴 수 없습니다. 확인을 위해 관리자 비밀번호를 입력하세요.",
     btn_confirm_reset: "초기화 확인",
     btn_confirm_reset: "초기화 확인",
     err_wrong_pw: "비밀번호가 일치하지 않습니다",
@@ -162,6 +197,7 @@ export const DICTIONARY = {
     // Internet Status
     status_online: "온라인",
     status_offline: "오프라인",
+    loading: "로딩 중...",
 
     // Criteria Categories
     // Criteria Manager
@@ -218,7 +254,8 @@ export const DICTIONARY = {
     live_ranking_desc: "실시간 점수 집계 현황",
 
     // Misc
-    msg_reset_warning_detail: "모든 점수가 삭제되고 참가팀/심사위원 목록 및 행사 설정이 초기화됩니다.",
+    msg_reset_warning_detail:
+      "모든 점수가 삭제되고 참가팀/심사위원 목록 및 행사 설정이 초기화됩니다.",
     placeholder_desc: "행사 설명을 입력하세요...",
     btn_change_image: "이미지 변경",
     no_judges: "등록된 심사위원이 없습니다.",
@@ -228,12 +265,13 @@ export const DICTIONARY = {
     pts: "점",
     cat_creativity: "도전성 및 창의성 (30)",
     cat_market: "시장성 (40)",
-    cat_business: "사업성 (30)"
+    cat_business: "사업성 (30)",
   },
   en: {
     app_title: "'25 Tech Biz",
     app_subtitle: "BM Idea Competition",
-    app_desc: "Premium solution for fair evaluation.\nField-optimized operation system.",
+    app_desc:
+      "Premium solution for fair evaluation.\nField-optimized operation system.",
     date_label: "Date",
     date_val: "Dec 03, 2025 (Wed)",
     loc_label: "Location",
@@ -245,12 +283,12 @@ export const DICTIONARY = {
     admin_placeholder_pw: "Password",
     btn_access: "Enter Dashboard",
     err_auth: "Access Denied.",
-    
+
     mission_control: "Mission Control Center",
     system_status: "System Operational",
     current_presenting: "Now Presenting",
     mode_ceremony: "Ceremony Mode",
-    
+
     field_control: "Field Operations",
     force_sync: "Force Active Team (Sync)",
     emergency_unlock: "Emergency Unlock",
@@ -261,14 +299,14 @@ export const DICTIONARY = {
     caution: "CAUTION",
     btn_unlock: "Unlock",
     btn_lock: "Lock",
-    
+
     live_ranking: "LIVE RANKING (Max 110pts)",
     ranking_calc: "Avg (Excl. Max/Min)",
     rank: "Rank",
     team: "TEAM",
     judge_progress: "Completion",
     total_score: "Total Score",
-    
+
     judge_mode: "Judge Mode",
     score_total: "Total Score",
     submit: "Submit",
@@ -278,32 +316,33 @@ export const DICTIONARY = {
     sign_placeholder: "Please sign here",
     btn_cancel: "Cancel",
     btn_complete: "Complete",
-    
+
     confirm_title: "Confirm Submission",
     confirm_msg: "Total Score",
     confirm_warn_title: "Warning: Zero Score",
     confirm_warn_desc: "item(s) have 0 points.",
     confirm_footer: "You can edit anytime after submission.",
     btn_recheck: "Review",
-    
+
     toast_saved: "Saved Successfully.",
     status_saving: "Saving...",
     status_saved: "Saved",
-    
+
     ai_analysis: "AI Analysis",
     ai_insight: "AI Insight",
-    ai_msg: "High score in 'Challenge' but low in 'Feasibility'. Feedback on regulatory solutions is recommended.",
+    ai_msg:
+      "High score in 'Challenge' but low in 'Feasibility'. Feedback on regulatory solutions is recommended.",
     comment_placeholder: "Enter your feedback for the team.",
-    
+
     detail_title: "Evaluation Details",
     detail_total_judges: "Total Judges",
     detail_completed: "Completed",
     not_submitted: "Pending",
     submitted: "Submitted",
-    
+
     final_score_label: "Final Score (Total 110)",
     grand_prix: "2025 Grand Prix",
-    
+
     // Team Management
     manage_teams: "Team Management",
     btn_add_team: "Add New Team",
@@ -365,18 +404,21 @@ export const DICTIONARY = {
     // System Reset
     danger_zone: "Danger Zone",
     btn_reset_all: "Reset All Data",
-    msg_confirm_reset: "Are you sure you want to delete all data? This action cannot be undone.",
+    msg_confirm_reset:
+      "Are you sure you want to delete all data? This action cannot be undone.",
     msg_reset_success: "System has been reset.",
 
     // Secure Reset Modal
     reset_modal_title: "Confirm Data Reset",
-    reset_modal_desc: "This action is irreversible. Please enter the admin password to confirm.",
+    reset_modal_desc:
+      "This action is irreversible. Please enter the admin password to confirm.",
     btn_confirm_reset: "Confirm Reset",
     err_wrong_pw: "Incorrect Password",
 
     // Internet Status
     status_online: "Online",
     status_offline: "Offline",
+    loading: "Loading...",
 
     // Criteria Categories
     cat_creativity: "Creativity & Challenge (30)",
@@ -390,7 +432,8 @@ export const DICTIONARY = {
     category_name_ko: "Category Name (KO)",
     category_name_en: "Category Name (EN)",
     max_points: "Max Points",
-    item_sum_error: "Item sum ({sum}) does not match category max ({max}). Please adjust.",
+    item_sum_error:
+      "Item sum ({sum}) does not match category max ({max}). Please adjust.",
     item_name_ko: "Item Name (KO)",
     item_name_en: "Item Name (EN)",
     item_desc: "Description / Guide",
@@ -409,7 +452,8 @@ export const DICTIONARY = {
     method_avg_desc: "Calculate standard average of all valid judge scores.",
     default: "Default",
     method_trimmed: "Trimmed Mean",
-    method_trimmed_desc: "Exclude Highest & Lowest scores to remove bias. (Olympic Style)",
+    method_trimmed_desc:
+      "Exclude Highest & Lowest scores to remove bias. (Olympic Style)",
     recommended: "Recommended",
     method_sum: "Total Sum",
     method_sum_desc: "Simple sum of all judge scores.",
@@ -437,55 +481,273 @@ export const DICTIONARY = {
     live_ranking_desc: "Real-time scoring updates",
 
     // Misc
-    msg_reset_warning_detail: "This will delete all scores, reset teams and judges to default, and clear all event settings.",
+    msg_reset_warning_detail:
+      "This will delete all scores, reset teams and judges to default, and clear all event settings.",
     placeholder_desc: "Event description...",
     btn_change_image: "Change Image",
     no_judges: "No judges registered yet.",
     no_teams: "No teams registered yet.",
     edit_judge: "Edit Judge",
     edit_team: "Edit Team",
-    pts: "pts"
-  }
+    pts: "pts",
+  },
 };
 
 /**
  * DATA & CONSTANTS
  */
 export const JUDGES = [
-  { id: 'j1', name: '고윤경', name_en: 'Ko Yoon-kyung', position: '수석심사역', company: '효성벤처스' },
-  { id: 'j2', name: '권오석', name_en: 'Kwon Oh-seok', position: '본부장', company: '에코프로파트너스' },
-  { id: 'j3', name: '김승현', name_en: 'Kim Seung-hyun', position: '이사', company: '신한벤처투자' },
-  { id: 'j4', name: '김재룡', name_en: 'Kim Jae-ryong', position: '본부장', company: '세아기술투자' },
-  { id: 'j5', name: '남범일', name_en: 'Nam Beom-il', position: '대표', company: '트라이앵글 파트너스' },
-  { id: 'j6', name: '오근태', name_en: 'Oh Geun-tae', position: '교수', company: '수원대학교' },
-  { id: 'j7', name: '채이식', name_en: 'Chae I-sik', position: '대표', company: '아이디어팜' }
+  {
+    id: "j1",
+    name: "고윤경",
+    name_en: "Ko Yoon-kyung",
+    position: "수석심사역",
+    company: "효성벤처스",
+  },
+  {
+    id: "j2",
+    name: "권오석",
+    name_en: "Kwon Oh-seok",
+    position: "본부장",
+    company: "에코프로파트너스",
+  },
+  {
+    id: "j3",
+    name: "김승현",
+    name_en: "Kim Seung-hyun",
+    position: "이사",
+    company: "신한벤처투자",
+  },
+  {
+    id: "j4",
+    name: "김재룡",
+    name_en: "Kim Jae-ryong",
+    position: "본부장",
+    company: "세아기술투자",
+  },
+  {
+    id: "j5",
+    name: "남범일",
+    name_en: "Nam Beom-il",
+    position: "대표",
+    company: "트라이앵글 파트너스",
+  },
+  {
+    id: "j6",
+    name: "오근태",
+    name_en: "Oh Geun-tae",
+    position: "교수",
+    company: "수원대학교",
+  },
+  {
+    id: "j7",
+    name: "채이식",
+    name_en: "Chae I-sik",
+    position: "대표",
+    company: "아이디어팜",
+  },
 ];
 
 export const TEAMS = [
-  { id: 't1', seq: 1, name: 'DReaM', univ: '한국기술교육대', univ_en: 'KOREATECH', presenter: '유준철', topic: '스마트 트러스 로드(SMTR)' },
-  { id: 't2', seq: 2, name: 'IRIS', univ: '연세대', univ_en: 'Yonsei Univ', presenter: '이승민', topic: '경증 치매 지연 관리' },
-  { id: 't3', seq: 3, name: '예로원', univ: '이화여대', univ_en: 'Ewha Womans Univ', presenter: '박나형', topic: '바이오폴리머 마이크로캡슐' },
-  { id: 't4', seq: 4, name: 'FARMVEST', univ: '한국해양대', univ_en: 'KMOU', presenter: '윤승열', topic: '그로핀' },
-  { id: 't5', seq: 5, name: 'AI Power Balancer', univ: '고려대', univ_en: 'Korea Univ', presenter: '최병국', topic: '온톨로지 기반 에너지 예측' },
-  { id: 't6', seq: 6, name: '스꾸팜', univ: '성균관대', univ_en: 'SKKU', presenter: '이성우', topic: '근로자 인력 매칭 관리' },
-  { id: 't7', seq: 7, name: 'Trustcle', univ: '호서대', univ_en: 'Hoseo Univ', presenter: '황은기', topic: '블록체인 기반 이력 인증' },
-  { id: 't8', seq: 8, name: 'DeepSeeker', univ: '부경대', univ_en: 'PKNU', presenter: '박준용', topic: 'Aqua Track System(ATS)' },
-  { id: 't9', seq: 9, name: '솔랩', univ: '한양대', univ_en: 'Hanyang Univ', presenter: '임미나', topic: 'SoleLAB 지능형 수제화' },
-  { id: 't10', seq: 10, name: '고려솔루션', univ: 'UNIST', univ_en: 'UNIST', presenter: '김민재', topic: '고온 질소 히터 시스템' },
-  { id: 't11', seq: 11, name: '춘옥컴퍼니', univ: 'UNIST', univ_en: 'UNIST', presenter: '허찬', topic: '6차 대멸종을 대비한...' },
-  { id: 't12', seq: 12, name: 'E-쿨링', univ: '부경대', univ_en: 'PKNU', presenter: '이승재', topic: '액침 냉각 시스템' },
-  { id: 't13', seq: 13, name: '막데헌', univ: '경상국립대', univ_en: 'GNU', presenter: '김태건', topic: '산청양조장 글로벌 전환' },
-  { id: 't14', seq: 14, name: 'Fringers', univ: '서강대', univ_en: 'Sogang Univ', presenter: '고원준', topic: 'Synapse AI' },
+  {
+    id: "t1",
+    seq: 1,
+    name: "DReaM",
+    univ: "한국기술교육대",
+    univ_en: "KOREATECH",
+    presenter: "유준철",
+    topic: "스마트 트러스 로드(SMTR)",
+  },
+  {
+    id: "t2",
+    seq: 2,
+    name: "IRIS",
+    univ: "연세대",
+    univ_en: "Yonsei Univ",
+    presenter: "이승민",
+    topic: "경증 치매 지연 관리",
+  },
+  {
+    id: "t3",
+    seq: 3,
+    name: "예로원",
+    univ: "이화여대",
+    univ_en: "Ewha Womans Univ",
+    presenter: "박나형",
+    topic: "바이오폴리머 마이크로캡슐",
+  },
+  {
+    id: "t4",
+    seq: 4,
+    name: "FARMVEST",
+    univ: "한국해양대",
+    univ_en: "KMOU",
+    presenter: "윤승열",
+    topic: "그로핀",
+  },
+  {
+    id: "t5",
+    seq: 5,
+    name: "AI Power Balancer",
+    univ: "고려대",
+    univ_en: "Korea Univ",
+    presenter: "최병국",
+    topic: "온톨로지 기반 에너지 예측",
+  },
+  {
+    id: "t6",
+    seq: 6,
+    name: "스꾸팜",
+    univ: "성균관대",
+    univ_en: "SKKU",
+    presenter: "이성우",
+    topic: "근로자 인력 매칭 관리",
+  },
+  {
+    id: "t7",
+    seq: 7,
+    name: "Trustcle",
+    univ: "호서대",
+    univ_en: "Hoseo Univ",
+    presenter: "황은기",
+    topic: "블록체인 기반 이력 인증",
+  },
+  {
+    id: "t8",
+    seq: 8,
+    name: "DeepSeeker",
+    univ: "부경대",
+    univ_en: "PKNU",
+    presenter: "박준용",
+    topic: "Aqua Track System(ATS)",
+  },
+  {
+    id: "t9",
+    seq: 9,
+    name: "솔랩",
+    univ: "한양대",
+    univ_en: "Hanyang Univ",
+    presenter: "임미나",
+    topic: "SoleLAB 지능형 수제화",
+  },
+  {
+    id: "t10",
+    seq: 10,
+    name: "고려솔루션",
+    univ: "UNIST",
+    univ_en: "UNIST",
+    presenter: "김민재",
+    topic: "고온 질소 히터 시스템",
+  },
+  {
+    id: "t11",
+    seq: 11,
+    name: "춘옥컴퍼니",
+    univ: "UNIST",
+    univ_en: "UNIST",
+    presenter: "허찬",
+    topic: "6차 대멸종을 대비한...",
+  },
+  {
+    id: "t12",
+    seq: 12,
+    name: "E-쿨링",
+    univ: "부경대",
+    univ_en: "PKNU",
+    presenter: "이승재",
+    topic: "액침 냉각 시스템",
+  },
+  {
+    id: "t13",
+    seq: 13,
+    name: "막데헌",
+    univ: "경상국립대",
+    univ_en: "GNU",
+    presenter: "김태건",
+    topic: "산청양조장 글로벌 전환",
+  },
+  {
+    id: "t14",
+    seq: 14,
+    name: "Fringers",
+    univ: "서강대",
+    univ_en: "Sogang Univ",
+    presenter: "고원준",
+    topic: "Synapse AI",
+  },
 ];
 
 export const CRITERIA = [
-  { id: 'c1', category: 'cat_creativity', label: 'BM 창의성', label_en: 'Creativity', max: 10, desc: '기존 비즈니스 대비 차별성' },
-  { id: 'c2', category: 'cat_creativity', label: 'BM 도전성', label_en: 'Challenge', max: 10, desc: '사업 추진력 또는 의지' },
-  { id: 'c3', category: 'cat_creativity', label: 'BM 혁신성', label_en: 'Innovation', max: 10, desc: '산업 혁신역량 제고' },
-  { id: 'm1', category: 'cat_market', label: '성장 가능성', label_en: 'Growth Potential', max: 15, desc: '목표시장 미래 성장성' },
-  { id: 'm2', category: 'cat_market', label: '시장진입장벽', label_en: 'Entry Barriers', max: 15, desc: '경쟁구조 및 규제' },
-  { id: 'm3', category: 'cat_market', label: '파급효과', label_en: 'Ripple Effect', max: 10, desc: '시장 확대 가능성' },
-  { id: 'b1', category: 'cat_business', label: '목표 구체성', label_en: 'Goal Specificity', max: 10, desc: '명료한 사업 가치 설정' },
-  { id: 'b2', category: 'cat_business', label: '수익모델', label_en: 'Business Model', max: 10, desc: '수익모델 구체화 정도' },
-  { id: 'b3', category: 'cat_business', label: '실현 가능성', label_en: 'Feasibility', max: 10, desc: '규제/비용 등 실현성' }
+  {
+    id: "c1",
+    category: "cat_creativity",
+    label: "BM 창의성",
+    label_en: "Creativity",
+    max: 10,
+    desc: "기존 비즈니스 대비 차별성",
+  },
+  {
+    id: "c2",
+    category: "cat_creativity",
+    label: "BM 도전성",
+    label_en: "Challenge",
+    max: 10,
+    desc: "사업 추진력 또는 의지",
+  },
+  {
+    id: "c3",
+    category: "cat_creativity",
+    label: "BM 혁신성",
+    label_en: "Innovation",
+    max: 10,
+    desc: "산업 혁신역량 제고",
+  },
+  {
+    id: "m1",
+    category: "cat_market",
+    label: "성장 가능성",
+    label_en: "Growth Potential",
+    max: 15,
+    desc: "목표시장 미래 성장성",
+  },
+  {
+    id: "m2",
+    category: "cat_market",
+    label: "시장진입장벽",
+    label_en: "Entry Barriers",
+    max: 15,
+    desc: "경쟁구조 및 규제",
+  },
+  {
+    id: "m3",
+    category: "cat_market",
+    label: "파급효과",
+    label_en: "Ripple Effect",
+    max: 10,
+    desc: "시장 확대 가능성",
+  },
+  {
+    id: "b1",
+    category: "cat_business",
+    label: "목표 구체성",
+    label_en: "Goal Specificity",
+    max: 10,
+    desc: "명료한 사업 가치 설정",
+  },
+  {
+    id: "b2",
+    category: "cat_business",
+    label: "수익모델",
+    label_en: "Business Model",
+    max: 10,
+    desc: "수익모델 구체화 정도",
+  },
+  {
+    id: "b3",
+    category: "cat_business",
+    label: "실현 가능성",
+    label_en: "Feasibility",
+    max: 10,
+    desc: "규제/비용 등 실현성",
+  },
 ];

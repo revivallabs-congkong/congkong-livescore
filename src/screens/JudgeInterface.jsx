@@ -22,8 +22,15 @@ import { CRITERIA } from "../data";
 
 const JudgeInterface = () => {
   const { t, lang } = useContext(AppContext);
-  const { teams, scores, control, eventSettings, isOnline, onSubmitScore } =
-    useData();
+  const {
+    teams,
+    scores,
+    control,
+    eventSettings,
+    isOnline,
+    onSubmitScore,
+    isLoading,
+  } = useData();
   const { userProfile, logout } = useAuth();
 
   const judge = userProfile;
@@ -164,10 +171,16 @@ const JudgeInterface = () => {
     document.body.removeChild(link);
   };
 
-  if (!judge || !activeTeam) {
+  // Show loading spinner while data is loading
+  if (isLoading || !judge || !activeTeam) {
     return (
-      <div className="h-screen flex items-center justify-center">
-        Loading...
+      <div className="h-screen bg-[#F5F5F7] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-slate-500 font-medium">
+            {t?.loading || "Loading..."}
+          </p>
+        </div>
       </div>
     );
   }

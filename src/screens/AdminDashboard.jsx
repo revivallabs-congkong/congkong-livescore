@@ -46,6 +46,7 @@ const AdminDashboard = () => {
     onControlUpdate,
     onGlobalLock,
     onJudgeUnlock,
+    isLoading,
   } = useData();
   const { logout } = useAuth();
 
@@ -208,6 +209,20 @@ const AdminDashboard = () => {
       }
     }
   }, [eventSettings?.timerPresentation]);
+
+  // Show loading spinner while data is loading
+  if (isLoading) {
+    return (
+      <div className="h-screen bg-slate-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-slate-500 font-medium">
+            {t?.loading || "Loading..."}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (mode === "CEREMONY") {
     return (

@@ -16,7 +16,7 @@ import { AdminLoginModal } from "../components/modals";
 
 const LoginScreen = () => {
   const { t } = useContext(AppContext);
-  const { judges, eventSettings } = useData();
+  const { judges, eventSettings, isLoading } = useData();
   const { login } = useAuth();
   const [showAdmin, setShowAdmin] = useState(false);
 
@@ -27,6 +27,20 @@ const LoginScreen = () => {
   const handleAdminLogin = () => {
     login({ id: "admin", name: "운영본부", role: "admin" });
   };
+
+  // Show loading spinner while data is loading
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#F2F2F7] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-slate-500 font-medium">
+            {t?.loading || "Loading..."}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F2F2F7]  flex items-center justify-center p-6 font-sans selection:bg-blue-500/30 transition-colors duration-500">
