@@ -117,7 +117,7 @@ const LoginScreen = () => {
                 onClick={() => handleJudgeLogin(judge)}
                 className="w-full group flex items-center gap-4 p-3 rounded-[20px] hover:bg-slate-100  transition-all duration-300 cursor-pointer"
               >
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-slate-100 to-slate-200   flex items-center justify-center font-bold text-slate-600  shadow-inner group-hover:scale-105 transition-transform">
+                <div className="w-12 h-12 rounded-full bg-linear-to-br from-slate-100 to-slate-200   flex items-center justify-center font-bold text-slate-600  shadow-inner group-hover:scale-105 transition-transform">
                   {judge.name[0]}
                 </div>
                 <div className="flex-1 text-left">

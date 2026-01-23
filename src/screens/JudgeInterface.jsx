@@ -61,6 +61,33 @@ const JudgeInterface = () => {
     return CRITERIA;
   }, [criteriaData]);
 
+  // Filter teams by judge's assigned category
+  // Filter teams by judge's assigned category
+  const filteredTeams = useMemo(() => {
+    if (!judge) return teams;
+
+    // Priority 1: Specific team IDs assigned
+    if (judge.assignedTeamIds?.length > 0) {
+      return teams.filter((t) => judge.assignedTeamIds.includes(t.id));
+    }
+
+    // Priority 2: Category assignment (Multi or Single)
+    const assignedCats = [];
+    if (Array.isArray(judge.assignedCategories)) {
+      assignedCats.push(...judge.assignedCategories);
+    } else if (judge.assignedCategory) {
+      // Backward compatibility
+      assignedCats.push(judge.assignedCategory);
+    }
+
+    if (assignedCats.length > 0) {
+      return teams.filter((t) => assignedCats.includes(t.category));
+    }
+
+    // Fallback: Show all (backward compatibility)
+    return teams;
+  }, [teams, judge]);
+
   // Sync active team
   useEffect(() => {
     if (control?.activeTeamId) setActiveTeamId(control.activeTeamId);
@@ -68,12 +95,13 @@ const JudgeInterface = () => {
 
   // Set initial activeTeamId when teams load
   useEffect(() => {
-    if (teams.length > 0 && !activeTeamId) {
-      setActiveTeamId(teams[0].id);
+    if (filteredTeams.length > 0 && !activeTeamId) {
+      setActiveTeamId(filteredTeams[0].id);
     }
-  }, [teams, activeTeamId]);
+  }, [filteredTeams, activeTeamId]);
 
-  const activeTeam = teams.find((t) => t.id === activeTeamId) || teams[0];
+  const activeTeam =
+    filteredTeams.find((t) => t.id === activeTeamId) || filteredTeams[0];
   const currentKey = judge ? `${activeTeamId}_${judge.id}` : null;
   const savedData = currentKey ? scores[currentKey] : null;
 
@@ -250,58 +278,74 @@ const JudgeInterface = () => {
               <div
                 className="h-full bg-blue-500 transition-all duration-500"
                 style={{
-                  width: `${(Object.keys(scores).filter((k) => k.includes(judge.id)).length / teams.length) * 100}%`,
+                  width: `${(Object.keys(scores).filter((k) => k.includes(judge.id)).length / filteredTeams.length) * 100}%`,
                 }}
               />
             </div>
+            {(judge.assignedCategory ||
+              (judge.assignedCategories &&
+                judge.assignedCategories.length > 0)) && (
+              <div className="mt-2 text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded-full text-center font-bold truncate">
+                {judge.assignedCategories?.length > 1
+                  ? `${judge.assignedCategories.length} Categories`
+                  : judge.assignedCategories?.[0] || judge.assignedCategory}
+                ({filteredTeams.length} teams)
+              </div>
+            )}
           </div>
           <div className="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar">
-            {teams.map((team) => {
-              const scoreData = scores[`${team.id}_${judge.id}`];
-              const isDone = !!scoreData;
-              const isActive = activeTeamId === team.id;
-              const isGlobalActive = control?.activeTeamId === team.id;
+            {filteredTeams.length === 0 ? (
+              <div className="text-center py-10 text-slate-400 text-sm">
+                No teams assigned to your category
+              </div>
+            ) : (
+              filteredTeams.map((team) => {
+                const scoreData = scores[`${team.id}_${judge.id}`];
+                const isDone = !!scoreData;
+                const isActive = activeTeamId === team.id;
+                const isGlobalActive = control?.activeTeamId === team.id;
 
-              return (
-                <button
-                  key={team.id}
-                  onClick={() => setActiveTeamId(team.id)}
-                  className={`w-full p-3 rounded-[16px] text-left transition-all duration-200 relative group
+                return (
+                  <button
+                    key={team.id}
+                    onClick={() => setActiveTeamId(team.id)}
+                    className={`w-full p-3 rounded-[16px] text-left transition-all duration-200 relative group
                     ${isActive ? "bg-white  shadow-sm" : "hover:bg-black/5 "}
                     ${isGlobalActive && !isActive ? "ring-1 ring-blue-500/50 ring-dashed" : ""}
                    cursor-pointer`}
-                >
-                  <div className="flex justify-between items-center mb-1">
-                    <div className="flex items-center gap-2">
-                      {isGlobalActive && (
-                        <div
-                          className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"
-                          title={t.current_presenting}
-                        />
-                      )}
-                      <span
-                        className={`font-bold text-xs ${isActive ? "text-blue-600" : ""}`}
-                      >
-                        {team.name}
-                      </span>
-                      {team.category && (
-                        <span className="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
-                          {team.category}
+                  >
+                    <div className="flex justify-between items-center mb-1">
+                      <div className="flex items-center gap-2">
+                        {isGlobalActive && (
+                          <div
+                            className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"
+                            title={t.current_presenting}
+                          />
+                        )}
+                        <span
+                          className={`font-bold text-xs ${isActive ? "text-blue-600" : ""}`}
+                        >
+                          {team.name}
+                        </span>
+                        {team.category && (
+                          <span className="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
+                            {team.category}
+                          </span>
+                        )}
+                      </div>
+                      {isDone && (
+                        <span className="font-mono font-bold text-xs text-blue-600 bg-blue-50  px-1.5 py-0.5 rounded flex items-center gap-1">
+                          {scoreData.total}
                         </span>
                       )}
                     </div>
-                    {isDone && (
-                      <span className="font-mono font-bold text-xs text-blue-600 bg-blue-50  px-1.5 py-0.5 rounded flex items-center gap-1">
-                        {scoreData.total}
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-[10px] text-slate-400 truncate">
-                    {team.topic}
-                  </div>
-                </button>
-              );
-            })}
+                    <div className="text-[10px] text-slate-400 truncate">
+                      {team.topic}
+                    </div>
+                  </button>
+                );
+              })
+            )}
           </div>
         </div>
 
@@ -334,7 +378,7 @@ const JudgeInterface = () => {
             <div className="flex items-center gap-4 w-full lg:w-auto justify-between lg:justify-end">
               <SettingsBar />
               <div className="px-3 py-1 bg-slate-100  rounded-full text-xs font-bold text-slate-500">
-                {activeTeam.seq} / {teams.length}
+                {activeTeam?.seq} / {filteredTeams.length}
               </div>
             </div>
           </div>

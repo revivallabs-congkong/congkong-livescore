@@ -18,6 +18,7 @@ import {
   Lock,
   Settings,
   PenTool,
+  ClipboardList,
 } from "lucide-react";
 import { AppContext } from "../context";
 import { useData } from "../context/DataContext";
@@ -29,6 +30,7 @@ import { JudgeManagement } from "../components/JudgeManagement";
 import { EventSettings } from "../components/EventSettings";
 import { CriteriaManager } from "../components/CriteriaManager";
 import { ScoringSettings } from "../components/ScoringSettings";
+import { AssignmentManager } from "../components/AssignmentManager";
 import { calculateFinalScore } from "../utils/scoring";
 
 const AdminDashboard = () => {
@@ -345,6 +347,12 @@ const AdminDashboard = () => {
           >
             <Calculator className="w-4 h-4" /> Scoring
           </button>
+          <button
+            onClick={() => setActiveTab("assignments")}
+            className={`px-6 py-2 rounded-lg text-sm font-bold transition-all cursor-pointer flex items-center gap-2 ${activeTab === "assignments" ? "bg-white text-slate-800 shadow-sm ring-1 ring-black/5" : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"}`}
+          >
+            <ClipboardList className="w-4 h-4" /> Assign
+          </button>
         </div>
 
         <div className="flex gap-3 items-center flex-wrap justify-center w-full lg:w-auto">
@@ -444,6 +452,15 @@ const AdminDashboard = () => {
             <ScoringSettings
               settings={eventSettings}
               onSave={onUpdateEventSettings}
+            />
+          </div>
+        ) : activeTab === "assignments" ? (
+          <div className="col-span-12 h-full overflow-hidden">
+            <AssignmentManager
+              judges={judges}
+              teams={teams}
+              setJudges={setJudges}
+              scores={scores}
             />
           </div>
         ) : (

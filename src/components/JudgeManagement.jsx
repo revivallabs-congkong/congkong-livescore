@@ -87,6 +87,7 @@ const AddJudgeForm = ({ onClose, onSave, initialData = null }) => {
       company: "",
       phone: "",
       email: "",
+      assignedCategory: "",
     },
   );
 
@@ -173,6 +174,19 @@ const AddJudgeForm = ({ onClose, onSave, initialData = null }) => {
             }
             className="w-full p-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder={t.label_email}
+          />
+        </div>
+        <div className="col-span-2">
+          <label className="block text-xs font-bold text-slate-500 mb-1">
+            Assigned Category
+          </label>
+          <input
+            value={newJudge.assignedCategory || ""}
+            onChange={(e) =>
+              setNewJudge({ ...newJudge, assignedCategory: e.target.value })
+            }
+            className="w-full p-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="e.g., CA, Poster, Oral (or use Assignment Manager)"
           />
         </div>
       </div>
@@ -329,6 +343,7 @@ export const JudgeManagement = ({ judges, setJudges }) => {
       const judge = {
         id: `j${Date.now()}`,
         seq: judges.length + 1,
+        assignedCategory: "",
         ...judgeData,
       };
       setJudges([...judges, judge]);
