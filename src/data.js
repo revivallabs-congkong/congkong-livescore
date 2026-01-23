@@ -76,7 +76,7 @@ export const DICTIONARY = {
     btn_unlock: "해제",
     btn_lock: "잠금",
 
-    live_ranking: "LIVE RANKING (Max 110pts)",
+    live_ranking: "실시간 순위 ({max}점 만점)",
     ranking_calc: "최고/최저 제외 평균 산출",
     rank: "순위",
     team: "TEAM",
@@ -116,7 +116,7 @@ export const DICTIONARY = {
     not_submitted: "미제출",
     submitted: "제출완료",
 
-    final_score_label: "Final Score (Total 110)",
+    final_score_label: "최종 점수 (총 {max}점)",
     grand_prix: "2025 Grand Prix",
 
     // Team Management
@@ -284,6 +284,8 @@ export const DICTIONARY = {
 
     // Admin Header & Nav
     session_timer: "세션 타이머",
+    timer_running: "진행 중",
+    timer_paused: "일시 정지",
     controls: "제어",
     nav_dashboard: "대시보드",
     nav_teams: "참가팀",
@@ -326,7 +328,7 @@ export const DICTIONARY = {
     btn_unlock: "Unlock",
     btn_lock: "Lock",
 
-    live_ranking: "LIVE RANKING (Max 110pts)",
+    live_ranking: "LIVE RANKING (Max {max}pts)",
     ranking_calc: "Avg (Excl. Max/Min)",
     rank: "Rank",
     team: "TEAM",
@@ -366,7 +368,7 @@ export const DICTIONARY = {
     not_submitted: "Pending",
     submitted: "Submitted",
 
-    final_score_label: "Final Score (Total 110)",
+    final_score_label: "Final Score (Total {max})",
     grand_prix: "2025 Grand Prix",
 
     // Team Management
@@ -534,6 +536,8 @@ export const DICTIONARY = {
 
     // Admin Header & Nav
     session_timer: "Session Timer",
+    timer_running: "Running",
+    timer_paused: "Paused",
     controls: "Controls",
     nav_dashboard: "Dashboard",
     nav_teams: "Teams",

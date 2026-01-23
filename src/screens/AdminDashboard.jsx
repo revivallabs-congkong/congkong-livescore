@@ -23,6 +23,7 @@ import {
 import { AppContext } from "../context";
 import { useData } from "../context/DataContext";
 import { useAuth } from "../context/AuthContext";
+import { CRITERIA } from "../data";
 import { SettingsBar, GlassCard } from "../components/ui";
 import { TeamDetailModal } from "../components/modals";
 import { TeamManagement } from "../components/TeamManagement";
@@ -55,6 +56,11 @@ const AdminDashboard = () => {
   const [mode, setMode] = useState("DASHBOARD");
   const [activeTab, setActiveTab] = useState("dashboard");
   const [selectedTeam, setSelectedTeam] = useState(null);
+
+  const maxScore = useMemo(
+    () => CRITERIA.reduce((acc, c) => acc + c.max, 0),
+    [],
+  );
 
   const stats = useMemo(() => {
     const totalVotes = Object.keys(scores).length;
@@ -258,7 +264,7 @@ const AdminDashboard = () => {
           <div className="mt-16 flex flex-col items-center relative">
             <div className="absolute -inset-10 bg-linear-to-t from-yellow-500/20 to-transparent blur-3xl rounded-full" />
             <div className="text-sm text-yellow-500/80 mb-4 uppercase tracking-[0.3em] font-bold">
-              {t.final_score_label}
+              {t.final_score_label.replace("{max}", maxScore)}
             </div>
             <div className="text-[10rem] leading-none font-black text-white select-none font-mono tabular-nums tracking-tighter drop-shadow-[0_0_60px_rgba(255,255,255,0.3)]">
               {stats.teamStats[0]?.judgeAvg.toFixed(2)}
@@ -425,11 +431,11 @@ const AdminDashboard = () => {
               <div className="flex gap-1">
                 {control?.timer?.isRunning ? (
                   <span className="flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 px-1.5 rounded">
-                    <Activity className="w-3 h-3 animate-pulse" /> Running
+                    <Activity className="w-3 h-3 animate-pulse" /> {t.timer_running}
                   </span>
                 ) : (
                   <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 rounded">
-                    Paused
+                    {t.timer_paused}
                   </span>
                 )}
               </div>
@@ -626,7 +632,7 @@ const AdminDashboard = () => {
                     </div>
                     <div>
                       <h3 className="font-bold text-sm uppercase tracking-wide text-slate-700">
-                        {t.live_ranking}
+                        {t.live_ranking.replace("{max}", maxScore)}
                       </h3>
                       <p className="text-xs text-slate-400">
                         {t.live_ranking_desc}
