@@ -282,6 +282,10 @@ export const DICTIONARY = {
     no_judges_found: "심사위원이 없습니다.",
     no_categories_found: "부문 없음",
 
+    // Judge Filters
+    search_placeholder: "팀 검색...",
+    filter_all: "전체",
+
     // Admin Header & Nav
     session_timer: "세션 타이머",
     timer_running: "진행 중",
@@ -533,6 +537,10 @@ export const DICTIONARY = {
     all_categories: "All Categories",
     no_judges_found: "No judges registered yet.",
     no_categories_found: "No categories found",
+
+    // Judge Filters
+    search_placeholder: "Search Team...",
+    filter_all: "All",
 
     // Admin Header & Nav
     session_timer: "Session Timer",

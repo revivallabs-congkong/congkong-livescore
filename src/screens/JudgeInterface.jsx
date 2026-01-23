@@ -6,6 +6,7 @@ import {
   Sparkles,
   Crown,
   Download,
+  Search,
 } from "lucide-react";
 import { AppContext } from "../context";
 import { useData } from "../context/DataContext";
@@ -44,6 +45,19 @@ const JudgeInterface = () => {
   const [showToast, setShowToast] = useState(false);
   const [showAI, setShowAI] = useState(false);
 
+  // Search & Filter State
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("ALL");
+
+  // Debounce Effect
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 300); // 300ms debounce
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
   // Derive Criteria from Settings or Fallback
   const criteriaData = useMemo(() => {
     if (eventSettings?.criteria?.categories) {
@@ -62,8 +76,7 @@ const JudgeInterface = () => {
   }, [criteriaData]);
 
   // Filter teams by judge's assigned category
-  // Filter teams by judge's assigned category
-  const filteredTeams = useMemo(() => {
+  const assignedTeams = useMemo(() => {
     if (!judge) return teams;
 
     // Priority 1: Specific team IDs assigned
@@ -88,6 +101,36 @@ const JudgeInterface = () => {
     return teams;
   }, [teams, judge]);
 
+  // Extract unique categories from assigned teams for filter chips
+  const availableCategories = useMemo(() => {
+    const cats = new Set(assignedTeams.map((t) => t.category).filter(Boolean));
+    return Array.from(cats).sort();
+  }, [assignedTeams]);
+
+  // Apply Search & Category Filters
+  const displayTeams = useMemo(() => {
+    let result = assignedTeams;
+
+    // 1. Category Filter
+    if (selectedCategory !== "ALL") {
+      result = result.filter((t) => t.category === selectedCategory);
+    }
+
+    // 2. Search Filter (Team Name, Presenter, Univ)
+    if (debouncedQuery.trim()) {
+      const q = debouncedQuery.toLowerCase();
+      result = result.filter(
+        (t) =>
+          t.name.toLowerCase().includes(q) ||
+          t.presenter?.toLowerCase().includes(q) ||
+          t.univ?.toLowerCase().includes(q) ||
+          t.univ_en?.toLowerCase().includes(q),
+      );
+    }
+
+    return result;
+  }, [assignedTeams, selectedCategory, debouncedQuery]);
+
   // Sync active team
   useEffect(() => {
     if (control?.activeTeamId) setActiveTeamId(control.activeTeamId);
@@ -95,13 +138,14 @@ const JudgeInterface = () => {
 
   // Set initial activeTeamId when teams load
   useEffect(() => {
-    if (filteredTeams.length > 0 && !activeTeamId) {
-      setActiveTeamId(filteredTeams[0].id);
+    // If no active team is selected, select the first one from the display list (or assigned list)
+    if (assignedTeams.length > 0 && !activeTeamId) {
+      setActiveTeamId(assignedTeams[0].id);
     }
-  }, [filteredTeams, activeTeamId]);
+  }, [assignedTeams, activeTeamId]);
 
   const activeTeam =
-    filteredTeams.find((t) => t.id === activeTeamId) || filteredTeams[0];
+    assignedTeams.find((t) => t.id === activeTeamId) || assignedTeams[0];
   const currentKey = judge ? `${activeTeamId}_${judge.id}` : null;
   const savedData = currentKey ? scores[currentKey] : null;
 
@@ -278,7 +322,7 @@ const JudgeInterface = () => {
               <div
                 className="h-full bg-blue-500 transition-all duration-500"
                 style={{
-                  width: `${(Object.keys(scores).filter((k) => k.includes(judge.id)).length / filteredTeams.length) * 100}%`,
+                  width: `${(Object.keys(scores).filter((k) => k.includes(judge.id)).length / assignedTeams.length) * 100}%`,
                 }}
               />
             </div>
@@ -289,17 +333,61 @@ const JudgeInterface = () => {
                 {judge.assignedCategories?.length > 1
                   ? `${judge.assignedCategories.length} Categories`
                   : judge.assignedCategories?.[0] || judge.assignedCategory}
-                ({filteredTeams.length} teams)
+                ({assignedTeams.length} teams)
               </div>
             )}
+
+            {/* Search & Filter Controls */}
+            <div className="mt-4 space-y-3">
+              {/* Search Input */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={t.search_placeholder || "Search Team..."}
+                  className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-slate-400"
+                />
+              </div>
+
+              {/* Category Chips */}
+              {availableCategories.length > 0 && (
+                <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-1">
+                  <button
+                    onClick={() => setSelectedCategory("ALL")}
+                    className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors ${
+                      selectedCategory === "ALL"
+                        ? "bg-slate-800 text-white"
+                        : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                    }`}
+                  >
+                    {t.filter_all || "All"}
+                  </button>
+                  {availableCategories.map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors ${
+                        selectedCategory === cat
+                          ? "bg-blue-600 text-white shadow-sm shadow-blue-200"
+                          : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
           <div className="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar">
-            {filteredTeams.length === 0 ? (
+            {displayTeams.length === 0 ? (
               <div className="text-center py-10 text-slate-400 text-sm">
-                No teams assigned to your category
+                No teams found
               </div>
             ) : (
-              filteredTeams.map((team) => {
+              displayTeams.map((team) => {
                 const scoreData = scores[`${team.id}_${judge.id}`];
                 const isDone = !!scoreData;
                 const isActive = activeTeamId === team.id;
@@ -378,7 +466,7 @@ const JudgeInterface = () => {
             <div className="flex items-center gap-4 w-full lg:w-auto justify-between lg:justify-end">
               <SettingsBar />
               <div className="px-3 py-1 bg-slate-100  rounded-full text-xs font-bold text-slate-500">
-                {activeTeam?.seq} / {filteredTeams.length}
+                {activeTeam?.seq} / {assignedTeams.length}
               </div>
             </div>
           </div>
