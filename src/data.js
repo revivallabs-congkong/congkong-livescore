@@ -266,6 +266,32 @@ export const DICTIONARY = {
     cat_creativity: "도전성 및 창의성 (30)",
     cat_market: "시장성 (40)",
     cat_business: "사업성 (30)",
+
+    // Assignment Manager
+    assign_manager: "심사 배정 관리",
+    assign_desc: "심사위원별 평가 부문 배정 및 관리",
+    quick_assign: "일괄 배정",
+    add_to_all: "전체 추가",
+    unsaved_changes: "저장되지 않은 변경사항",
+    save_to_apply: "저장 버튼을 눌러 반영하세요",
+    save_assignments: "배정 저장",
+    assigned_categories: "배정된 부문",
+    judge_profile: "심사위원 정보",
+    progress_status: "진행 현황",
+    all_categories: "전체 부문",
+    no_judges_found: "심사위원이 없습니다.",
+    no_categories_found: "부문 없음",
+
+    // Admin Header & Nav
+    session_timer: "세션 타이머",
+    controls: "제어",
+    nav_dashboard: "대시보드",
+    nav_teams: "참가팀",
+    nav_judges: "심사위원",
+    nav_assignments: "심사 배정",
+    nav_event: "행사 설정",
+    nav_criteria: "평가 기준",
+    nav_scoring: "채점 방식",
   },
   en: {
     app_title: "'25 Tech Biz",
@@ -490,6 +516,32 @@ export const DICTIONARY = {
     edit_judge: "Edit Judge",
     edit_team: "Edit Team",
     pts: "pts",
+
+    // Assignment Manager
+    assign_manager: "Assignment Manager",
+    assign_desc: "Manage judge-to-category assignments",
+    quick_assign: "Quick Assign",
+    add_to_all: "Add to All",
+    unsaved_changes: "Unsaved Changes",
+    save_to_apply: "Click save to apply",
+    save_assignments: "Save Assignments",
+    assigned_categories: "Assigned Categories",
+    judge_profile: "Judge Profile",
+    progress_status: "Progress Status",
+    all_categories: "All Categories",
+    no_judges_found: "No judges registered yet.",
+    no_categories_found: "No categories found",
+
+    // Admin Header & Nav
+    session_timer: "Session Timer",
+    controls: "Controls",
+    nav_dashboard: "Dashboard",
+    nav_teams: "Teams",
+    nav_judges: "Judges",
+    nav_assignments: "Assignments",
+    nav_event: "Event",
+    nav_criteria: "Criteria",
+    nav_scoring: "Scoring",
   },
 };
 

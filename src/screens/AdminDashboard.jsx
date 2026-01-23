@@ -359,13 +359,17 @@ const AdminDashboard = () => {
           {/* Navigation Tabs */}
           <div className="flex overflow-x-auto hide-scrollbar bg-slate-100/50 p-1 rounded-xl gap-1">
             {[
-              { id: "dashboard", icon: Activity, label: "Dashboard" },
-              { id: "teams", icon: Users, label: "Teams" },
-              { id: "judges", icon: Users, label: "Judges" },
-              { id: "assignments", icon: ClipboardList, label: "Assignments" },
-              { id: "event", icon: Settings, label: "Event" },
-              { id: "judging_criteria", icon: PenTool, label: "Criteria" },
-              { id: "judge_scoring", icon: Calculator, label: "Scoring" },
+              { id: "dashboard", icon: Activity, label: t.nav_dashboard },
+              { id: "teams", icon: Users, label: t.nav_teams },
+              { id: "judges", icon: Users, label: t.nav_judges },
+              {
+                id: "assignments",
+                icon: ClipboardList,
+                label: t.nav_assignments,
+              },
+              { id: "event", icon: Settings, label: t.nav_event },
+              { id: "judging_criteria", icon: PenTool, label: t.nav_criteria },
+              { id: "judge_scoring", icon: Calculator, label: t.nav_scoring },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -390,7 +394,7 @@ const AdminDashboard = () => {
           {/* Mobile Lock/Ceremony (Visible only on small screens) */}
           <div className="flex md:hidden justify-between items-center px-1">
             <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-              Controls
+              {t.controls}
             </div>
             <div className="flex gap-2">
               <button
@@ -416,7 +420,7 @@ const AdminDashboard = () => {
           <div className="flex items-center gap-2 pl-4 border-l border-slate-200/60 ml-auto lg:ml-0">
             <div className="flex flex-col items-end mr-2 hidden xl:block">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                Session Timer
+                {t.session_timer}
               </span>
               <div className="flex gap-1">
                 {control?.timer?.isRunning ? (
@@ -625,7 +629,7 @@ const AdminDashboard = () => {
                         {t.live_ranking}
                       </h3>
                       <p className="text-xs text-slate-400">
-                        Real-time scoring updates
+                        {t.live_ranking_desc}
                       </p>
                     </div>
                   </div>

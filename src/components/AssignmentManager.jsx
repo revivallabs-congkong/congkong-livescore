@@ -20,12 +20,7 @@ function cn(...inputs) {
 }
 
 // Robust MultiSelect using Radix Popover (Portaled)
-const MultiSelectDropdown = ({
-  options,
-  selected,
-  onChange,
-  placeholder = "Select Categories",
-}) => {
+const MultiSelectDropdown = ({ options, selected, onChange, placeholder }) => {
   const [open, setOpen] = useState(false);
 
   const toggleOption = (value) => {
@@ -55,7 +50,9 @@ const MultiSelectDropdown = ({
         >
           <div className="flex flex-wrap gap-1 flex-1">
             {(!selected || selected.length === 0) && (
-              <span className="text-slate-400 font-normal">{placeholder}</span>
+              <span className="text-slate-400 font-normal">
+                {placeholder || "Select"}
+              </span>
             )}
             {selected?.map((val) => (
               <span
@@ -230,10 +227,10 @@ export const AssignmentManager = ({ judges, teams, setJudges, scores }) => {
           </div>
           <div>
             <h2 className="text-xl font-bold text-slate-800">
-              Assignment Manager
+              {t.assign_manager}
             </h2>
             <p className="text-xs text-slate-500 font-medium whitespace-nowrap">
-              Manage assignments
+              {t.assign_desc}
             </p>
           </div>
         </div>
@@ -273,7 +270,7 @@ export const AssignmentManager = ({ judges, teams, setJudges, scores }) => {
                     {stats.totalTeams}
                   </span>
                   <span className="text-[10px] text-slate-400 font-bold mb-0.5">
-                    Teams
+                    {t.nav_teams || "Teams"}
                   </span>
                 </div>
 
@@ -286,7 +283,7 @@ export const AssignmentManager = ({ judges, teams, setJudges, scores }) => {
                     }}
                     className="text-[10px] font-bold text-blue-600 bg-white px-3 py-1.5 rounded-lg shadow-sm hover:scale-105 transition-transform"
                   >
-                    + Add to All
+                    + {t.add_to_all}
                   </button>
                 </div>
               </div>
@@ -299,10 +296,10 @@ export const AssignmentManager = ({ judges, teams, setJudges, scores }) => {
           {hasChanges && (
             <div className="hidden xl:flex flex-col items-end mr-2 animate-in slide-in-from-right-2">
               <span className="text-xs font-bold text-amber-600 whitespace-nowrap">
-                Unsaved Changes
+                {t.unsaved_changes}
               </span>
               <span className="text-[10px] text-slate-400">
-                Click save to apply
+                {t.save_to_apply}
               </span>
             </div>
           )}
@@ -315,7 +312,7 @@ export const AssignmentManager = ({ judges, teams, setJudges, scores }) => {
                 : "bg-slate-100 text-slate-300 cursor-not-allowed"
             }`}
           >
-            <Save className="w-4 h-4" /> Save
+            <Save className="w-4 h-4" /> {t.save_assignments || "Save"}
           </button>
         </div>
       </GlassCard>
@@ -324,10 +321,14 @@ export const AssignmentManager = ({ judges, teams, setJudges, scores }) => {
       <GlassCard className="flex-1 overflow-hidden flex flex-col p-0 shadow-xl border-slate-200/60">
         <div className="p-4 border-b border-slate-100 bg-slate-50/90 backdrop-blur-md grid grid-cols-12 gap-4 font-bold text-xs text-slate-500 uppercase tracking-wider sticky top-0 z-10 shadow-sm">
           <div className="col-span-1 text-center">#</div>
-          <div className="col-span-4 lg:col-span-3">Judge Profile</div>
-          <div className="col-span-2 hidden lg:block">Affiliation</div>
-          <div className="col-span-4 lg:col-span-3">Assigned Categories</div>
-          <div className="col-span-3">Progress Status</div>
+          <div className="col-span-4 lg:col-span-3">{t.judge_profile}</div>
+          <div className="col-span-2 hidden lg:block">
+            {t.label_affiliation || "Affiliation"}
+          </div>
+          <div className="col-span-4 lg:col-span-3">
+            {t.assigned_categories}
+          </div>
+          <div className="col-span-3">{t.progress_status}</div>
         </div>
 
         <div className="overflow-y-auto flex-1 p-0 bg-white custom-scrollbar">
@@ -336,7 +337,7 @@ export const AssignmentManager = ({ judges, teams, setJudges, scores }) => {
               <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center">
                 <Users className="w-8 h-8 text-slate-300" />
               </div>
-              <p>No judges registered yet.</p>
+              <p>{t.no_judges_found}</p>
             </div>
           ) : (
             <div className="divide-y divide-slate-50">
@@ -384,13 +385,14 @@ export const AssignmentManager = ({ judges, teams, setJudges, scores }) => {
                         onChange={(newCats) =>
                           handleCategoryChange(judge.id, newCats)
                         }
+                        placeholder={t.label_category || "Category"}
                       />
                     </div>
 
                     <div className="col-span-3 pt-1">
                       <div className="flex flex-col gap-1.5">
                         <div className="flex justify-between items-center text-[10px] uppercase font-bold text-slate-400">
-                          <span>Progress</span>
+                          <span>{t.judge_progress || "Progress"}</span>
                           <span
                             className={
                               isComplete
