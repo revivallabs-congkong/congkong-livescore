@@ -11,8 +11,9 @@ import {
   Check,
   X,
 } from "lucide-react";
-import { GlassCard } from "./ui";
+import { TeamSelectionModal } from "./modals";
 import { AppContext } from "../context";
+import { GlassCard } from "./ui";
 
 // Utility for merging tailwind classes
 function cn(...inputs) {
@@ -120,8 +121,10 @@ const MultiSelectDropdown = ({ options, selected, onChange, placeholder }) => {
 
 export const AssignmentManager = ({ judges, teams, setJudges, scores }) => {
   const { t, lang } = useContext(AppContext);
+
   const [localJudges, setLocalJudges] = useState(judges);
   const [hasChanges, setHasChanges] = useState(false);
+  const [editingJudgeId, setEditingJudgeId] = useState(null);
 
   // Dynamically extract unique categories from teams
   const CATEGORIES = useMemo(() => {
@@ -156,10 +159,19 @@ export const AssignmentManager = ({ judges, teams, setJudges, scores }) => {
 
       // If no categories assigned, assume NO teams (or ALL teams logic if desired)
       // Current logic: if no assignment, show ALL (backward compat)
-      const assignedTeams =
-        myCats.length > 0
-          ? teams.filter((t) => myCats.includes(t.category))
-          : teams;
+      // 1. Check for Specific Assignments (Priority 1)
+      const specificTeams = judge.assignedTeamIds || [];
+
+      let assignedTeams = [];
+      if (specificTeams.length > 0) {
+        assignedTeams = teams.filter((t) => specificTeams.includes(t.id));
+      } else {
+        // 2. Category Fallback
+        assignedTeams =
+          myCats.length > 0
+            ? teams.filter((t) => myCats.includes(t.category))
+            : teams;
+      }
 
       const completedCount = assignedTeams.filter(
         (team) => scores[`${team.id}_${judge.id}`],
@@ -191,6 +203,15 @@ export const AssignmentManager = ({ judges, teams, setJudges, scores }) => {
   const handleSave = () => {
     setJudges(localJudges);
     setHasChanges(false);
+  };
+
+  const handleTeamSave = (teamIds) => {
+    setLocalJudges((prev) =>
+      prev.map((j) =>
+        j.id === editingJudgeId ? { ...j, assignedTeamIds: teamIds } : j,
+      ),
+    );
+    setHasChanges(true);
   };
 
   // Quick assign: Add category to all (or clear all)
@@ -378,7 +399,7 @@ export const AssignmentManager = ({ judges, teams, setJudges, scores }) => {
                       {judge.company}
                     </div>
 
-                    <div className="col-span-4 lg:col-span-3 relative z-10">
+                    <div className="col-span-4 lg:col-span-3 relative z-10 space-y-2">
                       <MultiSelectDropdown
                         options={CATEGORIES}
                         selected={currentCategories}
@@ -387,6 +408,23 @@ export const AssignmentManager = ({ judges, teams, setJudges, scores }) => {
                         }
                         placeholder={t.label_category || "Category"}
                       />
+
+                      <div className="flex items-center justify-between">
+                        <button
+                          onClick={() => setEditingJudgeId(judge.id)}
+                          className="text-[10px] font-bold text-slate-400 bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded cursor-pointer transition-colors flex items-center gap-1"
+                        >
+                          <Users className="w-3 h-3" /> {t.btn_manage_teams}
+                        </button>
+                        {judge.assignedTeamIds?.length > 0 && (
+                          <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
+                            {t.specific_teams_count.replace(
+                              "{n}",
+                              judge.assignedTeamIds.length,
+                            )}
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     <div className="col-span-3 pt-1">
@@ -431,6 +469,19 @@ export const AssignmentManager = ({ judges, teams, setJudges, scores }) => {
           )}
         </div>
       </GlassCard>
+
+      {/* Team Selection Modal */}
+      {editingJudgeId && (
+        <TeamSelectionModal
+          isOpen={true}
+          onClose={() => setEditingJudgeId(null)}
+          teams={teams}
+          assignedTeamIds={
+            localJudges.find((j) => j.id === editingJudgeId)?.assignedTeamIds
+          }
+          onSave={handleTeamSave}
+        />
+      )}
     </div>
   );
 };

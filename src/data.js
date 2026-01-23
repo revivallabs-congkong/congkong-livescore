@@ -281,6 +281,9 @@ export const DICTIONARY = {
     all_categories: "전체 부문",
     no_judges_found: "심사위원이 없습니다.",
     no_categories_found: "부문 없음",
+    manage_teams_modal_title: "개별 팀 배정",
+    btn_manage_teams: "팀 관리",
+    specific_teams_count: "개별 {n}팀",
 
     // Judge Filters
     search_placeholder: "팀 검색...",
@@ -537,6 +540,9 @@ export const DICTIONARY = {
     all_categories: "All Categories",
     no_judges_found: "No judges registered yet.",
     no_categories_found: "No categories found",
+    manage_teams_modal_title: "Assign Specific Teams",
+    btn_manage_teams: "Manage Teams",
+    specific_teams_count: "{n} specific teams",
 
     // Judge Filters
     search_placeholder: "Search Team...",
