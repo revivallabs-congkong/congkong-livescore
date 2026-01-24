@@ -137,7 +137,7 @@ export const CriteriaManager = ({ settings, onSave }) => {
   const [categories, setCategories] = useState(initCats);
   const [items, setItems] = useState(initItems);
   const [activeTab, setActiveTab] = useState(
-    categories[0]?.id || "cat_creativity",
+    categories?.[0]?.id || "cat_creativity",
   );
 
   useEffect(() => {
@@ -145,7 +145,7 @@ export const CriteriaManager = ({ settings, onSave }) => {
     setCategories(cats);
     setItems(items);
     if (!cats.find((c) => c.id === activeTab)) {
-      setActiveTab(cats[0]?.id || null);
+      setActiveTab(cats?.[0]?.id || null);
     }
   }, [settings]);
 
@@ -455,7 +455,7 @@ export const CriteriaManager = ({ settings, onSave }) => {
                         categories.filter((c) => c.id !== activeTab),
                       );
                       setItems(items.filter((i) => i.category !== activeTab));
-                      setActiveTab(categories[0]?.id || null);
+                      setActiveTab(categories?.[0]?.id || null);
                     }
                   }}
                   className="px-4 py-2 text-red-500 hover:bg-red-50 rounded-lg text-xs font-bold transition-colors"

@@ -347,8 +347,13 @@ export const SignatureModal = ({ isOpen, onClose, onSave }) => {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX || e.touches[0].clientX) - rect.left;
-    const y = (e.clientY || e.touches[0].clientY) - rect.top;
+    // Check safe access for touch events
+    const clientX =
+      e.touches && e.touches.length > 0 ? e.touches[0].clientX : e.clientX;
+    const x = clientX - rect.left;
+    const clientY =
+      e.touches && e.touches.length > 0 ? e.touches[0].clientY : e.clientY;
+    const y = clientY - rect.top;
 
     if (e.type === "mousedown" || e.type === "touchstart") {
       ctx.beginPath();

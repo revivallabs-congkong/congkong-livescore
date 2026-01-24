@@ -379,7 +379,7 @@ export const JudgeManagement = ({ judges, setJudges }) => {
       const newJudges = [];
 
       const startIndex =
-        lines[0].includes("번호") || lines[0].includes("Seq") ? 1 : 0;
+        lines[0]?.includes("번호") || lines[0]?.includes("Seq") ? 1 : 0;
 
       for (let i = startIndex; i < lines.length; i++) {
         const line = lines[i].trim();

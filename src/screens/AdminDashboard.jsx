@@ -253,12 +253,12 @@ const AdminDashboard = () => {
 
           <div className="space-y-4">
             <h1 className="text-7xl md:text-9xl font-black tracking-tighter text-transparent bg-clip-text bg-linear-to-b from-white via-white to-slate-500 drop-shadow-2xl">
-              {stats.teamStats[0]?.name}
+              {stats.teamStats?.[0]?.name}
             </h1>
             <div className="text-3xl text-slate-400 font-light tracking-wide">
               {lang === "en"
-                ? stats.teamStats[0]?.univ_en
-                : stats.teamStats[0]?.univ}
+                ? stats.teamStats?.[0]?.univ_en
+                : stats.teamStats?.[0]?.univ}
             </div>
           </div>
 
@@ -268,7 +268,7 @@ const AdminDashboard = () => {
               {t.final_score_label.replace("{max}", maxScore)}
             </div>
             <div className="text-[10rem] leading-none font-black text-white select-none font-mono tabular-nums tracking-tighter drop-shadow-[0_0_60px_rgba(255,255,255,0.3)]">
-              {stats.teamStats[0]?.judgeAvg.toFixed(2)}
+              {stats.teamStats?.[0]?.judgeAvg?.toFixed(2) || "0.00"}
             </div>
           </div>
         </div>

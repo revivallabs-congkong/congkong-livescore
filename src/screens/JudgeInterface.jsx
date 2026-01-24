@@ -36,7 +36,7 @@ const JudgeInterface = () => {
 
   const judge = userProfile;
 
-  const [activeTeamId, setActiveTeamId] = useState(teams[0]?.id);
+  const [activeTeamId, setActiveTeamId] = useState(teams?.[0]?.id);
   const [localScore, setLocalScore] = useState({});
   const [memo, setMemo] = useState("");
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -140,12 +140,12 @@ const JudgeInterface = () => {
   useEffect(() => {
     // If no active team is selected, select the first one from the display list (or assigned list)
     if (assignedTeams.length > 0 && !activeTeamId) {
-      setActiveTeamId(assignedTeams[0].id);
+      if (assignedTeams[0]) setActiveTeamId(assignedTeams[0].id);
     }
   }, [assignedTeams, activeTeamId]);
 
   const activeTeam =
-    assignedTeams.find((t) => t.id === activeTeamId) || assignedTeams[0];
+    assignedTeams.find((t) => t.id === activeTeamId) || assignedTeams[0] || {};
   const currentKey = judge ? `${activeTeamId}_${judge.id}` : null;
   const savedData = currentKey ? scores[currentKey] : null;
 
@@ -297,7 +297,7 @@ const JudgeInterface = () => {
             </div>
             <div className="flex items-center gap-3 mb-4">
               <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs">
-                {judge.name[0]}
+                {judge.name?.[0] || "?"}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="font-bold text-sm truncate">
@@ -332,7 +332,9 @@ const JudgeInterface = () => {
               <div className="mt-2 text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded-full text-center font-bold truncate">
                 {judge.assignedCategories?.length > 1
                   ? `${judge.assignedCategories.length} Categories`
-                  : judge.assignedCategories?.[0] || judge.assignedCategory}
+                  : judge.assignedCategories?.[0] ||
+                    judge.assignedCategory ||
+                    "Unknown"}
                 ({assignedTeams.length} teams)
               </div>
             )}

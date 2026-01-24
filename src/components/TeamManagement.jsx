@@ -375,7 +375,7 @@ export const TeamManagement = ({ teams, setTeams }) => {
       const newTeams = [];
 
       const startIndex =
-        lines[0].includes("순서") || lines[0].includes("Order") ? 1 : 0;
+        lines[0]?.includes("순서") || lines[0]?.includes("Order") ? 1 : 0;
 
       for (let i = startIndex; i < lines.length; i++) {
         const line = lines[i].trim();
