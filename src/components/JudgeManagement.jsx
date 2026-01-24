@@ -373,32 +373,67 @@ export const JudgeManagement = ({ judges, setJudges }) => {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       const text = event.target.result;
-      const lines = text.split("\n");
+      const { parseCSV } = await import("../utils/csv");
+      const rows = parseCSV(text);
+
+      if (rows.length === 0) return;
+
+      // Identify header row
+      const headerRowIndex = rows.findIndex((row) =>
+        row.some((cell) => cell.includes("번호") || cell.includes("Seq")),
+      );
+
+      const dataRows =
+        headerRowIndex !== -1 ? rows.slice(headerRowIndex + 1) : rows;
       const newJudges = [];
 
-      const startIndex =
-        lines[0]?.includes("번호") || lines[0]?.includes("Seq") ? 1 : 0;
+      // Create a Set of existing keys for O(1) lookup
+      // Key: "Name|Company"
+      const existingKeys = new Set(
+        judges.map(
+          (j) =>
+            `${j.name.trim().toLowerCase()}|${j.company.trim().toLowerCase()}`,
+        ),
+      );
 
-      for (let i = startIndex; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (!line) continue;
+      let addedCount = 0;
+      let duplicateCount = 0;
 
-        const parts = line.split(",").map((p) => p.trim());
-        // Format: 번호,성함,직함,소속,핸드폰번호,이메일
-        if (parts.length >= 2) {
+      dataRows.forEach((row, index) => {
+        // Expected Min Length: 2 (Seq, Name)
+        if (row.length < 2) return;
+
+        // Mapping: 0:Seq, 1:Name, 2:Title, 3:Company, 4:Phone, 5:Email
+        const name = row[1] || "";
+        const role = row[2] || ""; // title
+        const company = row[3] || "";
+        const phone = row[4] || "";
+        const email = row[5] || "";
+
+        if (!name) return;
+
+        // Key for duplicate check
+        const key = `${name.trim().toLowerCase()}|${company.trim().toLowerCase()}`;
+
+        if (existingKeys.has(key)) {
+          duplicateCount++;
+        } else {
           newJudges.push({
-            id: `j${Date.now()}_${i}`,
-            seq: newJudges.length + judges.length + 1,
-            name: parts[1],
-            title: parts[2] || "",
-            company: parts[3] || "",
-            phone: parts[4] || "",
-            email: parts[5] || "",
+            id: `j${Date.now()}_${index}`,
+            seq: judges.length + addedCount + 1,
+            name,
+            title: role,
+            company,
+            phone,
+            email,
+            assignedCategory: "",
           });
+          existingKeys.add(key);
+          addedCount++;
         }
-      }
+      });
 
       if (newJudges.length > 0) {
         const combined = [...judges, ...newJudges].map((j, idx) => ({
@@ -406,7 +441,11 @@ export const JudgeManagement = ({ judges, setJudges }) => {
           seq: idx + 1,
         }));
         setJudges(combined);
-        alert(t.msg_judge_csv_success);
+        alert(
+          `${t.msg_judge_csv_success}\nAdded: ${addedCount}\nSkipped (Duplicates): ${duplicateCount}`,
+        );
+      } else if (duplicateCount > 0) {
+        alert(`No new judges added.\nSkipped ${duplicateCount} duplicates.`);
       }
     };
     reader.readAsText(file);

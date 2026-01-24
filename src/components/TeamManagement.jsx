@@ -369,33 +369,72 @@ export const TeamManagement = ({ teams, setTeams }) => {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       const text = event.target.result;
-      const lines = text.split("\n");
+
+      // Dynamic import to avoid top-level dependency issues if not bundled yet
+      const { parseCSV } = await import("../utils/csv");
+      const rows = parseCSV(text);
+
+      if (rows.length === 0) return;
+
+      // Identify header row
+      const headerRowIndex = rows.findIndex((row) =>
+        row.some((cell) => cell.includes("순서") || cell.includes("Order")),
+      );
+
+      const dataRows =
+        headerRowIndex !== -1 ? rows.slice(headerRowIndex + 1) : rows;
       const newTeams = [];
+      const skippedCount = 0;
 
-      const startIndex =
-        lines[0]?.includes("순서") || lines[0]?.includes("Order") ? 1 : 0;
+      // Create a Set of existing keys for O(1) lookup
+      // Key: "Name|University" (normalized)
+      const existingKeys = new Set(
+        teams.map(
+          (t) =>
+            `${t.name.trim().toLowerCase()}|${t.univ.trim().toLowerCase()}`,
+        ),
+      );
 
-      for (let i = startIndex; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (!line) continue;
+      let addedCount = 0;
+      let duplicateCount = 0;
 
-        const parts = line.split(",").map((p) => p.trim());
-        if (parts.length >= 7) {
+      dataRows.forEach((row, index) => {
+        // Expected Min Length: 6 (Seq, Category, Name, Univ, Presenter, Time)
+        if (row.length < 4) return;
+
+        // Mapping based on typical structure
+        // 0:Seq, 1:Category, 2:Name, 3:Univ, 4:Presenter, 5:Time, 6:Topic
+        const category = row[1] || "";
+        const name = row[2] || "";
+        const univ = row[3] || "";
+        const presenter = row[4] || "";
+        const time = row[5] || "";
+        const topic = row[6] || "";
+
+        if (!name || !univ) return;
+
+        const key = `${name.trim().toLowerCase()}|${univ.trim().toLowerCase()}`;
+
+        if (existingKeys.has(key)) {
+          duplicateCount++;
+        } else {
           newTeams.push({
-            id: `t${Date.now()}_${i}`,
-            seq: newTeams.length + teams.length + 1,
-            category: parts[1],
-            name: parts[2],
-            univ: parts[3],
-            presenter: parts[4],
-            time: parts[5],
-            topic: parts[6] || "",
-            univ_en: parts[3],
+            id: `t${Date.now()}_${index}`,
+            seq: teams.length + addedCount + 1,
+            category,
+            name,
+            univ,
+            presenter,
+            time,
+            topic,
+            univ_en: univ, // Default fallback
           });
+          existingKeys.add(key); // Add to set to prevent duplicates within the file itself
+          addedCount++;
         }
-      }
+      });
 
       if (newTeams.length > 0) {
         const combined = [...teams, ...newTeams].map((t, idx) => ({
@@ -403,7 +442,11 @@ export const TeamManagement = ({ teams, setTeams }) => {
           seq: idx + 1,
         }));
         setTeams(combined);
-        alert(t.msg_csv_success);
+        alert(
+          `${t.msg_csv_success}\nAdded: ${addedCount}\nSkipped (Duplicates): ${duplicateCount}`,
+        );
+      } else if (duplicateCount > 0) {
+        alert(`No new teams added.\nSkipped ${duplicateCount} duplicates.`);
       }
     };
     reader.readAsText(file);
