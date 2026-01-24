@@ -14,6 +14,9 @@ import {
   onSnapshot,
   deleteDoc,
   getDocs,
+  writeBatch,
+  query,
+  where,
 } from "firebase/firestore";
 import { auth, db } from "../firebaseConfig";
 import { CRITERIA } from "../data";
@@ -78,7 +81,31 @@ export const DataProvider = ({ children }) => {
     };
     init();
 
-    const handleOnline = () => setIsOnline(true);
+    const handleOnline = async () => {
+      setIsOnline(true);
+      // Sync offline scores when connection is restored
+      const offlineScores =
+        JSON.parse(localStorage.getItem("offlineScores")) || [];
+      if (offlineScores.length > 0) {
+        console.log(`Syncing ${offlineScores.length} offline scores`);
+        for (const score of offlineScores) {
+          try {
+            await handleSubmitScore(
+              score.teamId,
+              score.detail,
+              score.comment,
+              score.signature,
+              score.judgeProfile,
+            );
+          } catch (e) {
+            console.error("Failed to sync offline score:", e);
+          }
+        }
+        localStorage.removeItem("offlineScores");
+        alert("Offline scores synced successfully!");
+      }
+    };
+
     const handleOffline = () => setIsOnline(false);
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
@@ -106,23 +133,57 @@ export const DataProvider = ({ children }) => {
       }
     };
 
-    const qScores = collection(
+    // Optimized: Subscribe only to relevant scores (by judge) once judge profile is available
+    const unsubScores = () => {};
+    let scoresSubscription = null;
+
+    // Teams collection instead of single document
+    const qTeams = collection(
       db,
       "artifacts",
       appId,
       "public",
       "data",
-      "scores",
+      "teams",
     );
-    const unsubScores = onSnapshot(
-      qScores,
+    const unsubTeams = onSnapshot(
+      qTeams,
       (snapshot) => {
-        const data = {};
-        snapshot.forEach((doc) => (data[doc.id] = doc.data()));
-        setScores(data);
+        const data = [];
+        snapshot.forEach((doc) => data.push({ id: doc.id, ...doc.data() }));
+        setTeamsState(data);
+        teamsLoaded = true;
+        checkLoaded();
       },
       (error) => {
-        console.error("Error fetching scores:", error);
+        console.error("Error fetching teams:", error);
+        teamsLoaded = true;
+        checkLoaded();
+      },
+    );
+
+    // Judges collection instead of single document
+    const qJudges = collection(
+      db,
+      "artifacts",
+      appId,
+      "public",
+      "data",
+      "judges",
+    );
+    const unsubJudges = onSnapshot(
+      qJudges,
+      (snapshot) => {
+        const data = [];
+        snapshot.forEach((doc) => data.push({ id: doc.id, ...doc.data() }));
+        setJudgesState(data);
+        judgesLoaded = true;
+        checkLoaded();
+      },
+      (error) => {
+        console.error("Error fetching judges:", error);
+        judgesLoaded = true;
+        checkLoaded();
       },
     );
 
@@ -142,62 +203,6 @@ export const DataProvider = ({ children }) => {
       },
       (error) => {
         console.error("Error fetching control state:", error);
-      },
-    );
-
-    const qTeams = doc(
-      db,
-      "artifacts",
-      appId,
-      "public",
-      "data",
-      "admin",
-      "teams",
-    );
-    const unsubTeams = onSnapshot(
-      qTeams,
-      (docSnap) => {
-        if (docSnap.exists()) {
-          setTeamsState(docSnap.data().list || []);
-        } else {
-          // Don't auto-initialize, just set empty
-          setTeamsState([]);
-        }
-        teamsLoaded = true;
-        checkLoaded();
-      },
-      (error) => {
-        console.error("Error fetching teams:", error);
-        teamsLoaded = true;
-        checkLoaded();
-      },
-    );
-
-    const qJudges = doc(
-      db,
-      "artifacts",
-      appId,
-      "public",
-      "data",
-      "admin",
-      "judges",
-    );
-    const unsubJudges = onSnapshot(
-      qJudges,
-      (docSnap) => {
-        if (docSnap.exists()) {
-          setJudgesState(docSnap.data().list || []);
-        } else {
-          // Don't auto-initialize, just set empty
-          setJudgesState([]);
-        }
-        judgesLoaded = true;
-        checkLoaded();
-      },
-      (error) => {
-        console.error("Error fetching judges:", error);
-        judgesLoaded = true;
-        checkLoaded();
       },
     );
 
@@ -230,10 +235,10 @@ export const DataProvider = ({ children }) => {
     );
 
     return () => {
-      unsubScores();
-      unsubControl();
+      if (scoresSubscription) scoresSubscription();
       unsubTeams();
       unsubJudges();
+      unsubControl();
       unsubEventSettings();
     };
   }, [user]);
@@ -246,11 +251,35 @@ export const DataProvider = ({ children }) => {
     }
     setTeamsState(newTeams);
     try {
-      await setDoc(
-        doc(db, "artifacts", appId, "public", "data", "admin", "teams"),
-        { list: newTeams },
-        { merge: true },
+      const batch = writeBatch(db);
+      const teamsRef = collection(
+        db,
+        "artifacts",
+        appId,
+        "public",
+        "data",
+        "teams",
       );
+
+      // Delete existing teams
+      const existingTeams = await getDocs(teamsRef);
+      existingTeams.forEach((doc) => batch.delete(doc.ref));
+
+      // Add new teams
+      newTeams.forEach((team) => {
+        const docRef = doc(teamsRef, team.id);
+        batch.set(docRef, {
+          name: team.name,
+          seq: team.seq,
+          category: team.category,
+          univ: team.univ,
+          univ_en: team.univ_en,
+          presenter: team.presenter,
+          topic: team.topic,
+        });
+      });
+
+      await batch.commit();
     } catch (e) {
       console.error("Error updating teams:", e);
       alert("Failed to save team changes.");
@@ -264,11 +293,34 @@ export const DataProvider = ({ children }) => {
     }
     setJudgesState(newJudges);
     try {
-      await setDoc(
-        doc(db, "artifacts", appId, "public", "data", "admin", "judges"),
-        { list: newJudges },
-        { merge: true },
+      const batch = writeBatch(db);
+      const judgesRef = collection(
+        db,
+        "artifacts",
+        appId,
+        "public",
+        "data",
+        "judges",
       );
+
+      // Delete existing judges
+      const existingJudges = await getDocs(judgesRef);
+      existingJudges.forEach((doc) => batch.delete(doc.ref));
+
+      // Add new judges
+      newJudges.forEach((judge) => {
+        const docRef = doc(judgesRef, judge.id);
+        batch.set(docRef, {
+          name: judge.name,
+          name_en: judge.name_en,
+          company: judge.company,
+          assignedCategory: judge.assignedCategory,
+          assignedCategories: judge.assignedCategories,
+          assignedTeamIds: judge.assignedTeamIds,
+        });
+      });
+
+      await batch.commit();
     } catch (e) {
       console.error("Error updating judges:", e);
       alert("Failed to save judge changes.");
@@ -313,27 +365,39 @@ export const DataProvider = ({ children }) => {
       throw new Error("Not authenticated");
     }
     if (!judgeProfile) return;
-    const total = Object.values(detail).reduce((a, b) => a + b, 0);
-    const id = `${teamId}_${judgeProfile.id}`;
-    const payload = {
-      id,
-      teamId,
-      judgeId: judgeProfile.id,
-      judgeName: judgeProfile.name,
-      detail,
-      total,
-      comment,
-      signature,
-      timestamp: Date.now(),
-    };
-    setScores((prev) => ({ ...prev, [id]: payload }));
+
     try {
+      const total = Object.values(detail).reduce((a, b) => a + b, 0);
+      const id = `${teamId}_${judgeProfile.id}`;
+      const payload = {
+        id,
+        teamId,
+        judgeId: judgeProfile.id,
+        judgeName: judgeProfile.name,
+        detail,
+        total,
+        comment,
+        signature,
+        timestamp: Date.now(),
+      };
+
+      setScores((prev) => ({ ...prev, [id]: payload }));
+
       await setDoc(
         doc(db, "artifacts", appId, "public", "data", "scores", id),
         payload,
+        { merge: true },
       );
     } catch (e) {
       console.error("Error saving score:", e);
+      // Implement offline support
+      const offlineScores =
+        JSON.parse(localStorage.getItem("offlineScores")) || [];
+      offlineScores.push({ teamId, detail, comment, signature, judgeProfile });
+      localStorage.setItem("offlineScores", JSON.stringify(offlineScores));
+      alert(
+        "You're offline. Score will be synced when connection is restored.",
+      );
     }
   };
 
@@ -385,17 +449,35 @@ export const DataProvider = ({ children }) => {
       setScores({});
 
       // Reset teams to empty
-      await setDoc(
-        doc(db, "artifacts", appId, "public", "data", "admin", "teams"),
-        { list: [] },
+      const qTeams = collection(
+        db,
+        "artifacts",
+        appId,
+        "public",
+        "data",
+        "teams",
       );
+      const teamsSnapshot = await getDocs(qTeams);
+      const deleteTeamsPromises = teamsSnapshot.docs.map((doc) =>
+        deleteDoc(doc.ref),
+      );
+      await Promise.all(deleteTeamsPromises);
       setTeamsState([]);
 
       // Reset judges to empty
-      await setDoc(
-        doc(db, "artifacts", appId, "public", "data", "admin", "judges"),
-        { list: [] },
+      const qJudges = collection(
+        db,
+        "artifacts",
+        appId,
+        "public",
+        "data",
+        "judges",
       );
+      const judgesSnapshot = await getDocs(qJudges);
+      const deleteJudgesPromises = judgesSnapshot.docs.map((doc) =>
+        deleteDoc(doc.ref),
+      );
+      await Promise.all(deleteJudgesPromises);
       setJudgesState([]);
 
       // Reset event settings to defaults (including criteria)
@@ -470,6 +552,42 @@ export const DataProvider = ({ children }) => {
       alert("Failed to reset system.");
     }
   };
+
+  // Optimized score subscription based on judge profile
+  useEffect(() => {
+    if (!user || !judges.length) return;
+
+    // Find current judge profile from judges
+    const currentJudge =
+      judges.find((j) => j.id === user.uid) ||
+      judges.find((j) => j.email === user.email);
+
+    if (!currentJudge) return;
+
+    // Subscribe only to scores where judgeId matches current judge
+    const scoresQuery = query(
+      collection(db, "artifacts", appId, "public", "data", "scores"),
+      where("judgeId", "==", currentJudge.id),
+    );
+
+    const unsub = onSnapshot(
+      scoresQuery,
+      (snapshot) => {
+        const data = {};
+        snapshot.forEach((doc) => {
+          const scoreData = doc.data();
+          const id = `${scoreData.teamId}_${scoreData.judgeId}`;
+          data[id] = scoreData;
+        });
+        setScores(data);
+      },
+      (error) => {
+        console.error("Error fetching scores:", error);
+      },
+    );
+
+    return unsub;
+  }, [user, judges]);
 
   const handleResetScores = async () => {
     if (!user) return;

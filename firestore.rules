@@ -1,0 +1,39 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow read access to all data for authenticated users
+    match /artifacts/{appId}/public/data/{document=**} {
+      allow read: if request.auth != null;
+    }
+
+    // Scores - allow creation/updates only by judges
+    match /artifacts/{appId}/public/data/scores/{scoreId} {
+      allow create: if request.auth != null && 
+        request.resource.data.judgeId == request.auth.uid;
+      allow update: if request.auth != null && 
+        resource.data.judgeId == request.auth.uid;
+      allow delete: if false; // Prevent deletion of scores
+    }
+
+    // Teams - admin only
+    match /artifacts/{appId}/public/data/teams/{teamId} {
+      allow write: if request.auth != null && isAdmin(request.auth.uid);
+    }
+
+    // Judges - admin only
+    match /artifacts/{appId}/public/data/judges/{judgeId} {
+      allow write: if request.auth != null && isAdmin(request.auth.uid);
+    }
+
+    // Admin settings - admin only
+    match /artifacts/{appId}/public/data/admin/{settingId} {
+      allow write: if request.auth != null && isAdmin(request.auth.uid);
+    }
+
+    function isAdmin(uid) {
+      // Add admin UID(s) here for security
+      // return uid in ['admin1_uid', 'admin2_uid'];
+      return true; // Allow all for testing, restrict in production
+    }
+  }
+}

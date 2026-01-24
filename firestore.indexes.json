@@ -1,0 +1,26 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "scores",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "judgeId", "order": "ASCENDING" },
+        { "fieldPath": "teamId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "teams",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "category", "order": "ASCENDING" },
+        { "fieldPath": "seq", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "judges",
+      "queryScope": "COLLECTION",
+      "fields": [{ "fieldPath": "assignedCategory", "order": "ASCENDING" }]
+    }
+  ],
+  "fieldOverrides": []
+}
