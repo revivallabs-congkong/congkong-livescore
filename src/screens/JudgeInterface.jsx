@@ -79,26 +79,33 @@ const JudgeInterface = () => {
   const assignedTeams = useMemo(() => {
     if (!judge) return teams;
 
-    // Priority 1: Specific team IDs assigned
-    if (judge.assignedTeamIds?.length > 0) {
-      return teams.filter((t) => judge.assignedTeamIds.includes(t.id));
-    }
-
-    // Priority 2: Category assignment (Multi or Single)
+    // Logic: Union of (Category Matches) + (Specific Assignments)
     const assignedCats = [];
     if (Array.isArray(judge.assignedCategories)) {
       assignedCats.push(...judge.assignedCategories);
     } else if (judge.assignedCategory) {
-      // Backward compatibility
       assignedCats.push(judge.assignedCategory);
     }
 
-    if (assignedCats.length > 0) {
-      return teams.filter((t) => assignedCats.includes(t.category));
+    const hasCategories = assignedCats.length > 0;
+    const hasSpecific = judge.assignedTeamIds?.length > 0;
+
+    // Fallback: If NO assignments at all, show ALL teams
+    if (!hasCategories && !hasSpecific) {
+      return teams;
     }
 
-    // Fallback: Show all (backward compatibility)
-    return teams;
+    // Combine teams that match EITHER category OR specific ID
+    const merged = teams.filter((t) => {
+      const matchesCategory =
+        hasCategories && assignedCats.includes(t.category);
+      const matchesSpecific =
+        hasSpecific && judge.assignedTeamIds.includes(t.id);
+      return matchesCategory || matchesSpecific;
+    });
+
+    // Sort by sequence just in case
+    return merged.sort((a, b) => a.seq - b.seq);
   }, [teams, judge]);
 
   // Extract unique categories from assigned teams for filter chips

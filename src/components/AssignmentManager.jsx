@@ -159,18 +159,19 @@ export const AssignmentManager = ({ judges, teams, setJudges, scores }) => {
 
       // If no categories assigned, assume NO teams (or ALL teams logic if desired)
       // Current logic: if no assignment, show ALL (backward compat)
-      // 1. Check for Specific Assignments (Priority 1)
-      const specificTeams = judge.assignedTeamIds || [];
+      // 1. Determine Assigned Teams (Union Logic)
+      const specificTeamIds = judge.assignedTeamIds || [];
+      const hasSpecific = specificTeamIds.length > 0;
+      const hasCategories = myCats.length > 0;
 
-      let assignedTeams = [];
-      if (specificTeams.length > 0) {
-        assignedTeams = teams.filter((t) => specificTeams.includes(t.id));
-      } else {
-        // 2. Category Fallback
-        assignedTeams =
-          myCats.length > 0
-            ? teams.filter((t) => myCats.includes(t.category))
-            : teams;
+      let assignedTeams = teams;
+
+      if (hasSpecific || hasCategories) {
+        assignedTeams = teams.filter((t) => {
+          const isCategoryMatch = hasCategories && myCats.includes(t.category);
+          const isSpecificMatch = hasSpecific && specificTeamIds.includes(t.id);
+          return isCategoryMatch || isSpecificMatch;
+        });
       }
 
       const completedCount = assignedTeams.filter(
