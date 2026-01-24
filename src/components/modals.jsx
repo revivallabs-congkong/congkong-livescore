@@ -138,7 +138,10 @@ export const TeamDetailModal = ({
               score && score.total === maxScore && submittedScores.length > 2;
             const isMin =
               score && score.total === minScore && submittedScores.length > 2;
-            const jName = lang === "en" ? judge.name_en : judge.name;
+            const jName =
+              (lang === "en" ? judge.name_en : judge.name) ||
+              judge.name ||
+              "Unknown";
 
             return (
               <div
