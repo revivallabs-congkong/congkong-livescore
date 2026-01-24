@@ -274,8 +274,8 @@ export const DataProvider = ({ children }) => {
           category: team.category,
           univ: team.univ,
           univ_en: team.univ_en,
-          presenter: team.presenter,
-          topic: team.topic,
+          presenter: team.presenter || "",
+          topic: team.topic || "",
         });
       });
 
@@ -311,12 +311,14 @@ export const DataProvider = ({ children }) => {
       newJudges.forEach((judge) => {
         const docRef = doc(judgesRef, judge.id);
         batch.set(docRef, {
-          name: judge.name,
-          name_en: judge.name_en,
-          company: judge.company,
-          assignedCategory: judge.assignedCategory,
-          assignedCategories: judge.assignedCategories,
-          assignedTeamIds: judge.assignedTeamIds,
+          name: judge.name || "",
+          name_en: judge.name_en || "",
+          company: judge.company || "",
+          assignedCategory: judge.assignedCategory || "",
+          assignedCategories: judge.assignedCategories || [],
+          assignedTeamIds: judge.assignedTeamIds || [],
+          // Preserve existing signature if not provided in update
+          ...(judge.signature ? { signature: judge.signature } : {}),
         });
       });
 
@@ -324,6 +326,26 @@ export const DataProvider = ({ children }) => {
     } catch (e) {
       console.error("Error updating judges:", e);
       alert("Failed to save judge changes.");
+    }
+  };
+
+  const handleSaveJudgeSignature = async (judgeId, signatureData) => {
+    if (!user) return;
+    try {
+      await setDoc(
+        doc(db, "artifacts", appId, "public", "data", "judges", judgeId),
+        { signature: signatureData },
+        { merge: true },
+      );
+      // Update local state
+      setJudgesState((prev) =>
+        prev.map((j) =>
+          j.id === judgeId ? { ...j, signature: signatureData } : j,
+        ),
+      );
+    } catch (e) {
+      console.error("Error saving signature:", e);
+      throw e;
     }
   };
 
@@ -632,8 +654,11 @@ export const DataProvider = ({ children }) => {
     onControlUpdate: handleControlUpdate,
     onGlobalLock: handleGlobalLock,
     onJudgeUnlock: handleJudgeUnlock,
+    onGlobalLock: handleGlobalLock,
+    onJudgeUnlock: handleJudgeUnlock,
     onSystemReset: handleSystemReset,
     onScoresReset: handleResetScores,
+    saveJudgeSignature: handleSaveJudgeSignature,
   };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;

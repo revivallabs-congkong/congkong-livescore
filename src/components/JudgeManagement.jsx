@@ -428,6 +428,7 @@ export const JudgeManagement = ({ judges, setJudges }) => {
             company,
             phone,
             email,
+            name_en: "", // explicitly set optional fields
             assignedCategory: "",
           });
           existingKeys.add(key);

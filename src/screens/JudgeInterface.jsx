@@ -30,6 +30,7 @@ const JudgeInterface = () => {
     eventSettings,
     isOnline,
     onSubmitScore,
+    saveJudgeSignature,
     isLoading,
   } = useData();
   const { userProfile, logout } = useAuth();
@@ -188,10 +189,33 @@ const JudgeInterface = () => {
     setIsSignatureOpen(true);
   };
 
-  const handleSignatureSubmit = async (signatureData) => {
+  const handleSignatureSubmit = async (
+    signatureData,
+    hasSign,
+    isSaveDefault,
+  ) => {
     setIsSignatureOpen(false);
     setSaveStatus("saving");
-    await onSubmitScore(activeTeamId, localScore, memo, signatureData, judge);
+
+    let finalSignature = signatureData;
+
+    try {
+      if (isSaveDefault) {
+        await saveJudgeSignature(judge.id, signatureData);
+        // We still send the full data this time, or "PROFILE_REF" if we trust the save worked immediately
+        // For safety on first save, let's send the data.
+        // Future submissions will use the stored one.
+      }
+    } catch (e) {
+      console.error("Failed to save default signature", e);
+    }
+
+    // Optimization check: If judge ALREADY has a profile signature AND it matches the current one (or we just saved it)
+    // We can just send "PROFILE_REF"
+    // For simplicity: If we just saved it, or if user explicitly chose "Use Saved" (future feature), we ref it.
+    // Here we'll treat the checkbox as "Update my profile".
+
+    await onSubmitScore(activeTeamId, localScore, memo, finalSignature, judge);
     setSaveStatus("saved");
     setShowToast(true);
     setTimeout(() => {
@@ -590,6 +614,22 @@ const JudgeInterface = () => {
                   >
                     {isLocked ? "Locked" : savedData ? t.update : t.submit}
                   </button>
+
+                  {/* Reuse Signature Button */}
+                  {!isLocked && judge.signature && (
+                    <button
+                      onClick={() =>
+                        handleSignatureSubmit("PROFILE_REF", false)
+                      }
+                      className="relative z-10 bg-white/20 hover:bg-white/30 text-white px-4 py-3 rounded-xl font-bold text-xs shadow-lg transition-all ml-2 cursor-pointer flex flex-col items-center justify-center leading-none gap-1"
+                      title={t.use_saved_signature || "Use Saved Signature"}
+                    >
+                      <span className="opacity-80 text-[10px] uppercase tracking-wider">
+                        Quick
+                      </span>
+                      <span>Sign</span>
+                    </button>
+                  )}
                   <div className="absolute right-0 bottom-0 opacity-10 pointer-events-none transform translate-x-4 translate-y-4">
                     <Crown className="w-32 h-32" />
                   </div>

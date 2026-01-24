@@ -90,6 +90,8 @@ export const DICTIONARY = {
     sign_title: "평가 결과 서명",
     sign_desc: "제출된 점수는 최종 결과에 즉시 반영됩니다.",
     sign_placeholder: "서명을 입력해주세요",
+    save_as_default_signature: "내 기본 서명으로 저장하기",
+    use_saved_signature: "저장된 서명 사용",
     btn_cancel: "취소",
     btn_complete: "제출 완료",
 
@@ -352,6 +354,8 @@ export const DICTIONARY = {
     sign_title: "Sign Evaluation",
     sign_desc: "Scores are reflected immediately.",
     sign_placeholder: "Please sign here",
+    save_as_default_signature: "Save as my default signature",
+    use_saved_signature: "Use Saved Signature",
     btn_cancel: "Cancel",
     btn_complete: "Complete",
 

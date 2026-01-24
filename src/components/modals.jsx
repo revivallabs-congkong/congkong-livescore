@@ -191,7 +191,12 @@ export const TeamDetailModal = ({
                     {score.signature && (
                       <div className="mt-2 flex justify-end">
                         <img
-                          src={score.signature}
+                          src={
+                            score.signature === "PROFILE_REF"
+                              ? judges.find((j) => j.id === score.judgeId)
+                                  ?.signature || ""
+                              : score.signature
+                          }
                           alt="Signature"
                           className="h-8 opacity-70"
                         />
@@ -328,8 +333,13 @@ export const SignatureModal = ({ isOpen, onClose, onSave }) => {
   const { t } = useContext(AppContext);
   const canvasRef = useRef(null);
   const [hasSign, setHasSign] = useState(false);
+  const [isSaveDefault, setIsSaveDefault] = useState(false);
 
   useEffect(() => {
+    if (isOpen) {
+      setIsSaveDefault(false);
+      setHasSign(false);
+    }
     if (isOpen && canvasRef.current) {
       const canvas = canvasRef.current;
       const ctx = canvas.getContext("2d");
@@ -398,12 +408,29 @@ export const SignatureModal = ({ isOpen, onClose, onSave }) => {
             {t.btn_cancel}
           </button>
           <button
-            onClick={() => onSave(canvasRef.current.toDataURL())}
+            onClick={() =>
+              onSave(canvasRef.current.toDataURL(), hasSign, isSaveDefault)
+            }
             disabled={!hasSign}
             className="py-3 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 text-sm disabled:opacity-50 cursor-pointer"
           >
             {t.btn_complete}
           </button>
+        </div>
+        <div className="mt-4 flex items-center justify-center gap-2">
+          <input
+            type="checkbox"
+            id="saveDefault"
+            className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            checked={isSaveDefault}
+            onChange={(e) => setIsSaveDefault(e.target.checked)}
+          />
+          <label
+            htmlFor="saveDefault"
+            className="text-xs text-slate-500 font-medium cursor-pointer select-none"
+          >
+            {t.save_as_default_signature}
+          </label>
         </div>
       </div>
     </div>
