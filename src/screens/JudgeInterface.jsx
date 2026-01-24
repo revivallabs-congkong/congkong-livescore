@@ -7,6 +7,7 @@ import {
   Crown,
   Download,
   Search,
+  Zap,
 } from "lucide-react";
 import { AppContext } from "../context";
 import { useData } from "../context/DataContext";
@@ -607,6 +608,7 @@ const JudgeInterface = () => {
                       {totalScore}
                     </div>
                   </div>
+                  <div className="flex items-center gap-2">
                   <button
                     onClick={handlePreSubmit}
                     disabled={isLocked}
@@ -621,15 +623,19 @@ const JudgeInterface = () => {
                       onClick={() =>
                         handleSignatureSubmit("PROFILE_REF", false)
                       }
-                      className="relative z-10 bg-white/20 hover:bg-white/30 text-white px-4 py-3 rounded-xl font-bold text-xs shadow-lg transition-all ml-2 cursor-pointer flex flex-col items-center justify-center leading-none gap-1"
-                      title={t.use_saved_signature || "Use Saved Signature"}
+                      className="relative z-10 bg-linear-to-br from-amber-300 to-orange-500 hover:from-amber-400 hover:to-orange-600 text-white px-5 py-2 rounded-xl font-bold text-xs shadow-[0_4px_12px_rgba(245,158,11,0.4)] transition-all ml-3 cursor-pointer flex flex-col items-center justify-center leading-none gap-0.5 border border-white/20 active:scale-95 hover:scale-105 group overflow-hidden"
+                      title={t.use_saved_signature}
                     >
-                      <span className="opacity-80 text-[10px] uppercase tracking-wider">
-                        Quick
+                      <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 rounded-xl"></div>
+                      <div className="flex items-center gap-1 opacity-90 text-[10px] uppercase tracking-wider font-extrabold text-amber-100">
+                        <Zap className="w-3 h-3 fill-amber-100" /> {t.btn_quick}
+                      </div>
+                      <span className="text-sm font-black drop-shadow-sm">
+                        {t.btn_sign}
                       </span>
-                      <span>Sign</span>
                     </button>
                   )}
+                  </div>
                   <div className="absolute right-0 bottom-0 opacity-10 pointer-events-none transform translate-x-4 translate-y-4">
                     <Crown className="w-32 h-32" />
                   </div>

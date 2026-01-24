@@ -92,6 +92,8 @@ export const DICTIONARY = {
     sign_placeholder: "서명을 입력해주세요",
     save_as_default_signature: "내 기본 서명으로 저장하기",
     use_saved_signature: "저장된 서명 사용",
+    btn_quick: "간편",
+    btn_sign: "서명",
     btn_cancel: "취소",
     btn_complete: "제출 완료",
 
@@ -356,6 +358,8 @@ export const DICTIONARY = {
     sign_placeholder: "Please sign here",
     save_as_default_signature: "Save as my default signature",
     use_saved_signature: "Use Saved Signature",
+    btn_quick: "Quick",
+    btn_sign: "Sign",
     btn_cancel: "Cancel",
     btn_complete: "Complete",
 

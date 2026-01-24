@@ -349,6 +349,17 @@ export const SignatureModal = ({ isOpen, onClose, onSave }) => {
       ctx.lineCap = "round";
       ctx.lineWidth = 3;
       ctx.strokeStyle = "#3b82f6";
+
+      // Attach non-passive touch listeners manually to support e.preventDefault()
+      const handleTouch = (e) => draw(e);
+
+      canvas.addEventListener("touchstart", handleTouch, { passive: false });
+      canvas.addEventListener("touchmove", handleTouch, { passive: false });
+
+      return () => {
+        canvas.removeEventListener("touchstart", handleTouch);
+        canvas.removeEventListener("touchmove", handleTouch);
+      };
     }
   }, [isOpen]);
 
@@ -391,8 +402,6 @@ export const SignatureModal = ({ isOpen, onClose, onSave }) => {
             className="w-full h-full touch-none cursor-crosshair"
             onMouseDown={draw}
             onMouseMove={draw}
-            onTouchStart={draw}
-            onTouchMove={draw}
           />
           {!hasSign && (
             <div className="absolute inset-0 flex items-center justify-center text-slate-400 text-xs pointer-events-none">
