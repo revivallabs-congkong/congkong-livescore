@@ -432,6 +432,31 @@ export const DataProvider = ({ children }) => {
     }
   };
 
+  const handleResetScores = async () => {
+    if (!user) return;
+
+    try {
+      // Delete all scores
+      const qScores = collection(
+        db,
+        "artifacts",
+        appId,
+        "public",
+        "data",
+        "scores",
+      );
+      const snapshot = await getDocs(qScores);
+      const deletePromises = snapshot.docs.map((doc) => deleteDoc(doc.ref));
+      await Promise.all(deletePromises);
+      setScores({});
+
+      alert("Scores have been reset successfully.");
+    } catch (e) {
+      console.error("Error resetting scores:", e);
+      alert("Failed to reset scores.");
+    }
+  };
+
   const value = {
     // State
     user,
@@ -451,6 +476,7 @@ export const DataProvider = ({ children }) => {
     onGlobalLock: handleGlobalLock,
     onJudgeUnlock: handleJudgeUnlock,
     onSystemReset: handleSystemReset,
+    onScoresReset: handleResetScores,
   };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;

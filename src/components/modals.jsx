@@ -403,7 +403,13 @@ export const SignatureModal = ({ isOpen, onClose, onSave }) => {
 };
 
 // Secure Reset Confirmation Modal
-export const ResetConfirmModal = ({ isOpen, onClose, onConfirm }) => {
+export const ResetConfirmModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  title,
+  description,
+}) => {
   const { t } = useContext(AppContext);
   const [pw, setPw] = useState("");
   const [error, setError] = useState("");
@@ -429,7 +435,7 @@ export const ResetConfirmModal = ({ isOpen, onClose, onConfirm }) => {
       <div className="bg-white w-[90%] max-w-[400px] rounded-[32px] p-8 shadow-2xl border border-red-100 animate-in zoom-in-95">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-xl font-bold flex items-center gap-2 text-red-600">
-            <AlertTriangle className="w-6 h-6" /> {t.reset_modal_title}
+            <AlertTriangle className="w-6 h-6" /> {title || t.reset_modal_title}
           </h3>
           <button
             onClick={onClose}
@@ -440,7 +446,7 @@ export const ResetConfirmModal = ({ isOpen, onClose, onConfirm }) => {
         </div>
 
         <p className="text-sm text-slate-600 mb-6 leading-relaxed">
-          {t.reset_modal_desc}
+          {description || t.reset_modal_desc}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">

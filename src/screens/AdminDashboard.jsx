@@ -50,6 +50,7 @@ const AdminDashboard = () => {
     onGlobalLock,
     onJudgeUnlock,
     isLoading,
+    onScoresReset,
   } = useData();
   const { logout } = useAuth();
 
@@ -431,7 +432,8 @@ const AdminDashboard = () => {
               <div className="flex gap-1">
                 {control?.timer?.isRunning ? (
                   <span className="flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 px-1.5 rounded">
-                    <Activity className="w-3 h-3 animate-pulse" /> {t.timer_running}
+                    <Activity className="w-3 h-3 animate-pulse" />{" "}
+                    {t.timer_running}
                   </span>
                 ) : (
                   <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 rounded">
@@ -488,6 +490,7 @@ const AdminDashboard = () => {
               settings={eventSettings}
               onSave={onUpdateEventSettings}
               onReset={onSystemReset}
+              onResetScores={onScoresReset}
             />
           </div>
         ) : activeTab === "judging_criteria" ? (

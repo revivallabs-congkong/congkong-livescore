@@ -185,6 +185,9 @@ export const DICTIONARY = {
     msg_confirm_reset:
       "정말로 모든 데이터를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
     msg_reset_success: "시스템이 초기화되었습니다.",
+    btn_reset_scores: "점수만 초기화",
+    msg_reset_scores_warning:
+      "모든 심사 점수가 삭제됩니다. 팀/심사위원 정보는 유지됩니다.",
 
     // Secure Reset Modal
     reset_modal_title: "데이터 초기화 확인",
@@ -442,6 +445,9 @@ export const DICTIONARY = {
     msg_confirm_reset:
       "Are you sure you want to delete all data? This action cannot be undone.",
     msg_reset_success: "System has been reset.",
+    btn_reset_scores: "Reset Scores Only",
+    msg_reset_scores_warning:
+      "All scores will be deleted. Teams and judges will remain.",
 
     // Secure Reset Modal
     reset_modal_title: "Confirm Data Reset",
