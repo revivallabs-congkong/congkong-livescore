@@ -16,6 +16,7 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { auth, db } from "../firebaseConfig";
+import { CRITERIA } from "../data";
 
 const appId = "1:642440523500:web:993b21fc1a7b05dfaaffc9";
 
@@ -397,7 +398,45 @@ export const DataProvider = ({ children }) => {
       );
       setJudgesState([]);
 
-      // Reset event settings to empty
+      // Reset event settings to defaults (including criteria)
+
+      const defaultCategories = [
+        {
+          id: "cat_creativity",
+          label: "창의성",
+          label_en: "Creativity",
+          max: 30,
+        },
+        {
+          id: "cat_market",
+          label: "시장성",
+          label_en: "Marketability",
+          max: 40,
+        },
+        {
+          id: "cat_business",
+          label: "사업성",
+          label_en: "Feasibility",
+          max: 30,
+        },
+      ];
+
+      const nestedCategories = defaultCategories.map((cat) => ({
+        ...cat,
+        maxPoints: cat.max,
+        items: CRITERIA.filter((i) => i.category === cat.id),
+      }));
+
+      const defaultEventSettings = {
+        criteria: {
+          categories: nestedCategories,
+        },
+        scoringMethod: "avg",
+        voteMode: "none",
+        voteRatio: { judge: 70, audience: 30 },
+        rankBonus: { 1: 5, 2: 3, 3: 1, other: 0 },
+      };
+
       await setDoc(
         doc(
           db,
@@ -408,9 +447,9 @@ export const DataProvider = ({ children }) => {
           "admin",
           "event_settings",
         ),
-        {},
+        defaultEventSettings,
       );
-      setEventSettings({});
+      setEventSettings(defaultEventSettings);
 
       // Reset control state
       const defaultControl = {

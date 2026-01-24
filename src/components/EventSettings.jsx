@@ -29,9 +29,16 @@ export const EventSettings = ({ settings, onSave, onReset, onResetScores }) => {
   const [resetTarget, setResetTarget] = useState(null);
 
   useEffect(() => {
-    if (settings) {
-      setLocalSettings((prev) => ({ ...prev, ...settings }));
-    }
+    const defaults = {
+      bannerUrl: "",
+      timerPresentation: 12,
+      timerQnA: 3,
+      mainTitle: "",
+      eventTime: "",
+      location: "",
+      description: "",
+    };
+    setLocalSettings({ ...defaults, ...(settings || {}) });
   }, [settings]);
 
   const handleImageUpload = (e) => {
