@@ -432,37 +432,63 @@ const JudgeInterface = () => {
                     key={team.id}
                     onClick={() => setActiveTeamId(team.id)}
                     className={`w-full p-3 rounded-[16px] text-left transition-all duration-200 relative group
-                    ${isActive ? "bg-white  shadow-sm" : "hover:bg-black/5 "}
+                    ${isActive ? "bg-white shadow-sm ring-1 ring-black/5" : "hover:bg-black/5"}
                     ${isGlobalActive && !isActive ? "ring-1 ring-blue-500/50 ring-dashed" : ""}
                    cursor-pointer`}
                   >
-                    <div className="flex justify-between items-center mb-1">
-                      <div className="flex items-center gap-2">
-                        {isGlobalActive && (
-                          <div
-                            className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"
-                            title={t.current_presenting}
-                          />
-                        )}
-                        <span
-                          className={`font-bold text-xs ${isActive ? "text-blue-600" : ""}`}
-                        >
-                          {team.name}
-                        </span>
-                        {team.category && (
-                          <span className="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
-                            {team.category}
+                    <div className="flex flex-col gap-1.5">
+                      {/* Top Row: Presenter & Team Name */}
+                      <div className="flex justify-between items-start gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          {isGlobalActive && (
+                            <div
+                              className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shrink-0"
+                              title={t.current_presenting}
+                            />
+                          )}
+                          <div className="flex items-baseline gap-2 min-w-0">
+                            {/* Presenter Name - Prominent */}
+                            <span
+                              className={`font-black text-sm truncate ${isActive ? "text-slate-900" : "text-slate-700"}`}
+                            >
+                              {team.presenter || "Presenter"}
+                            </span>
+                            {/* Team Name - Secondary but clear */}
+                            <span
+                              className={`text-xs font-semibold truncate ${isActive ? "text-slate-500" : "text-slate-500/80"}`}
+                            >
+                              {team.name}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Score Badge */}
+                        {isDone && (
+                          <span className="font-mono font-bold text-xs text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded flex items-center gap-1 shrink-0">
+                            {scoreData.total}
                           </span>
                         )}
                       </div>
-                      {isDone && (
-                        <span className="font-mono font-bold text-xs text-blue-600 bg-blue-50  px-1.5 py-0.5 rounded flex items-center gap-1">
-                          {scoreData.total}
+
+                      {/* Bottom Row: Seq, Category, Topic */}
+                      <div className="flex items-center gap-2 text-[10px] text-slate-400">
+                        {/* Seq Piller */}
+                        <span className="font-mono font-bold text-slate-500 bg-slate-200/50 px-1.5 py-0.5 rounded text-[9px]">
+                          #{team.seq}
                         </span>
-                      )}
-                    </div>
-                    <div className="text-[10px] text-slate-400 truncate">
-                      {team.topic}
+
+                        {/* Category if exists */}
+                        {team.category && (
+                          <span className="text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded truncate max-w-[80px]">
+                            {team.category}
+                          </span>
+                        )}
+
+                        <span className="w-0.5 h-0.5 rounded-full bg-slate-300"></span>
+
+                        {/* Topic */}
+                        <span className="truncate flex-1">{team.topic}</span>
+                      </div>
                     </div>
                   </button>
                 );
