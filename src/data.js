@@ -59,6 +59,9 @@ export const DICTIONARY = {
     admin_placeholder_pw: "비밀번호",
     btn_access: "대시보드 접속",
     err_auth: "접근 권한이 없습니다.",
+    pin_modal_title: "접근 코드 입력",
+    pin_modal_desc: "{name} 심사위원님의 4자리 PIN을 입력해주세요.",
+    header_pin: "접근 코드",
 
     mission_control: "Mission Control Center",
     system_status: "시스템 정상 가동 중",
@@ -95,6 +98,7 @@ export const DICTIONARY = {
     btn_quick: "간편",
     btn_sign: "서명",
     btn_cancel: "취소",
+    btn_login: "로그인",
     btn_complete: "제출 완료",
 
     confirm_title: "제출 확인",
@@ -361,7 +365,8 @@ export const DICTIONARY = {
     btn_quick: "Quick",
     btn_sign: "Sign",
     btn_cancel: "Cancel",
-    btn_complete: "Complete",
+    btn_login: "Login",
+    btn_complete: "Submit",
 
     confirm_title: "Confirm Submission",
     confirm_msg: "Total Score",
@@ -468,6 +473,9 @@ export const DICTIONARY = {
     status_online: "Online",
     status_offline: "Offline",
     loading: "Loading...",
+    pin_modal_title: "Enter Access Code",
+    pin_modal_desc: "Please enter the 4-digit PIN for {name}.",
+    header_pin: "PIN",
 
     // Criteria Categories
     cat_creativity: "Creativity & Challenge (30)",

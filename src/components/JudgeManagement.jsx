@@ -333,7 +333,7 @@ const JudgeList = ({ judges, onDelete, onEdit, onReorder }) => {
         <div className="col-span-2">{t.header_company}</div>
         <div className="col-span-2">{t.header_phone}</div>
         <div className="col-span-1">{t.header_email}</div>
-        <div className="col-span-1 text-center">PIN</div>
+        <div className="col-span-1 text-center">{t.header_pin}</div>
         <div className="col-span-1 text-center">{t.header_action}</div>
         <div className="col-span-1 text-center">{t.header_action}</div>
       </div>

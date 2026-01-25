@@ -170,10 +170,10 @@ const LoginScreen = () => {
         <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 animate-in zoom-in-95 duration-200">
             <h3 className="text-xl font-bold text-slate-800 mb-2">
-              Enter Access Code
+              {t.pin_modal_title}
             </h3>
-            <p className="text-slate-500 mb-6 text-sm">
-              Please enter the 4-digit PIN for <b>{selectedJudge.name}</b>.
+            <p className="text-sm text-slate-500 mb-6">
+              {t.pin_modal_desc.replace("{name}", selectedJudge.name)}
             </p>
 
             <form onSubmit={handleJudgeLogin}>
@@ -202,13 +202,13 @@ const LoginScreen = () => {
                   onClick={() => setSelectedJudge(null)}
                   className="flex-1 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition-colors"
                 >
-                  Cancel
+                  {t.btn_cancel}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all"
                 >
-                  Login
+                  {t.btn_login}
                 </button>
               </div>
             </form>
