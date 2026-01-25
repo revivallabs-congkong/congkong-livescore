@@ -420,6 +420,8 @@ export const JudgeManagement = ({ judges, setJudges }) => {
       const { parseCSV } = await import("../utils/csv");
       const rows = parseCSV(text);
 
+      console.log("CSV Loaded, total rows:", rows.length);
+
       if (rows.length === 0) return;
 
       // Identify header row
@@ -427,8 +429,13 @@ export const JudgeManagement = ({ judges, setJudges }) => {
         row.some((cell) => cell.includes("번호") || cell.includes("Seq")),
       );
 
+      console.log("Header row index:", headerRowIndex);
+
       const dataRows =
         headerRowIndex !== -1 ? rows.slice(headerRowIndex + 1) : rows;
+
+      console.log("Data rows to process:", dataRows.length);
+
       const newJudges = [];
 
       // Map for O(1) lookup of existing judges by key
@@ -438,6 +445,8 @@ export const JudgeManagement = ({ judges, setJudges }) => {
         const key = `${j.name.trim().toLowerCase()}|${j.company.trim().toLowerCase()}`;
         judgeMap.set(key, { ...j, originalIndex: index });
       });
+
+      console.log("Existing judges map size:", judgeMap.size);
 
       let addedCount = 0;
       let updatedCount = 0;
@@ -460,9 +469,17 @@ export const JudgeManagement = ({ judges, setJudges }) => {
         const key = `${name.trim().toLowerCase()}|${company.trim().toLowerCase()}`;
         const existingJudge = judgeMap.get(key);
 
+        console.log(`Processing row ${index}:`, {
+          name,
+          company,
+          key,
+          exists: !!existingJudge,
+        });
+
         if (existingJudge) {
           // If existing judge has no accessCode, generate one
           if (!existingJudge.accessCode) {
+            console.log("Updating existing judge with new PIN:", name);
             const updatedJudge = {
               ...existingJudge,
               accessCode: Math.floor(1000 + Math.random() * 9000).toString(),
@@ -478,6 +495,12 @@ export const JudgeManagement = ({ judges, setJudges }) => {
               newJudgesList[listIndex] = updatedJudge;
               updatedCount++;
             }
+          } else {
+            console.log(
+              "Judge already has PIN:",
+              name,
+              existingJudge.accessCode,
+            );
           }
         } else {
           // Add new
@@ -493,12 +516,15 @@ export const JudgeManagement = ({ judges, setJudges }) => {
             assignedCategory: "",
             accessCode: Math.floor(1000 + Math.random() * 9000).toString(),
           };
+          console.log("Adding new judge:", name);
           newJudgesList.push(newJ);
           // Add to map to prevent dupes within the same CSV file
           judgeMap.set(key, newJ);
           addedCount++;
         }
       });
+
+      console.log("Added:", addedCount, "Updated:", updatedCount);
 
       if (addedCount > 0 || updatedCount > 0) {
         // Re-sequence
