@@ -609,32 +609,43 @@ const JudgeInterface = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                  <button
-                    onClick={handlePreSubmit}
-                    disabled={isLocked}
-                    className={`relative z-10 bg-white text-blue-600 px-6 py-3 rounded-xl font-bold text-sm shadow-lg transition-all ${isLocked ? "opacity-50 cursor-not-allowed" : "hover:scale-105 active:scale-95 cursor-pointer"}`}
-                  >
-                    {isLocked ? "Locked" : savedData ? t.update : t.submit}
-                  </button>
-
-                  {/* Reuse Signature Button */}
-                  {!isLocked && judge.signature && (
                     <button
-                      onClick={() =>
-                        handleSignatureSubmit("PROFILE_REF", false)
-                      }
-                      className="relative z-10 bg-linear-to-br from-amber-300 to-orange-500 hover:from-amber-400 hover:to-orange-600 text-white px-5 py-2 rounded-xl font-bold text-xs shadow-[0_4px_12px_rgba(245,158,11,0.4)] transition-all ml-3 cursor-pointer flex flex-col items-center justify-center leading-none gap-0.5 border border-white/20 active:scale-95 hover:scale-105 group overflow-hidden"
-                      title={t.use_saved_signature}
+                      onClick={handlePreSubmit}
+                      disabled={isLocked || saveStatus === "saving"}
+                      className={`relative z-10 bg-white text-blue-600 px-6 py-3 rounded-xl font-bold text-sm shadow-lg transition-all ${isLocked || saveStatus === "saving" ? "opacity-50 cursor-not-allowed" : "hover:scale-105 active:scale-95 cursor-pointer"} flex items-center gap-2`}
                     >
-                      <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 rounded-xl"></div>
-                      <div className="flex items-center gap-1 opacity-90 text-[10px] uppercase tracking-wider font-extrabold text-amber-100">
-                        <Zap className="w-3 h-3 fill-amber-100" /> {t.btn_quick}
-                      </div>
-                      <span className="text-sm font-black drop-shadow-sm">
-                        {t.btn_sign}
-                      </span>
+                      {saveStatus === "saving" && (
+                        <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                      )}
+                      {isLocked
+                        ? t.locked || "Locked"
+                        : saveStatus === "saving"
+                          ? t.status_saving || "Saving..."
+                          : savedData
+                            ? t.update
+                            : t.submit}
                     </button>
-                  )}
+
+                    {/* Reuse Signature Button */}
+                    {!isLocked && judge.signature && (
+                      <button
+                        onClick={() =>
+                          handleSignatureSubmit("PROFILE_REF", false)
+                        }
+                        disabled={saveStatus === "saving"}
+                        className={`relative z-10 bg-linear-to-br from-amber-300 to-orange-500 hover:from-amber-400 hover:to-orange-600 text-white px-5 py-2 rounded-xl font-bold text-xs shadow-[0_4px_12px_rgba(245,158,11,0.4)] transition-all ml-3 cursor-pointer flex flex-col items-center justify-center leading-none gap-0.5 border border-white/20 active:scale-95 hover:scale-105 group overflow-hidden ${saveStatus === "saving" ? "opacity-50 cursor-not-allowed" : ""}`}
+                        title={t.use_saved_signature}
+                      >
+                        <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 rounded-xl"></div>
+                        <div className="flex items-center gap-1 opacity-90 text-[10px] uppercase tracking-wider font-extrabold text-amber-100">
+                          <Zap className="w-3 h-3 fill-amber-100" />{" "}
+                          {t.btn_quick}
+                        </div>
+                        <span className="text-sm font-black drop-shadow-sm">
+                          {t.btn_sign}
+                        </span>
+                      </button>
+                    )}
                   </div>
                   <div className="absolute right-0 bottom-0 opacity-10 pointer-events-none transform translate-x-4 translate-y-4">
                     <Crown className="w-32 h-32" />
