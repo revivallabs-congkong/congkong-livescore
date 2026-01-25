@@ -372,81 +372,125 @@ export const TeamManagement = ({ teams, setTeams }) => {
     reader.onload = async (event) => {
       const text = event.target.result;
 
-      // Dynamic import to avoid top-level dependency issues if not bundled yet
-      const { parseCSV } = await import("../utils/csv");
-      const rows = parseCSV(text);
+      try {
+        const { parseCSV } = await import("../utils/csv");
+        const rows = parseCSV(text);
 
-      if (rows.length === 0) return;
+        if (rows.length === 0) return;
 
-      // Identify header row
-      const headerRowIndex = rows.findIndex((row) =>
-        row.some((cell) => cell.includes("순서") || cell.includes("Order")),
-      );
-
-      const dataRows =
-        headerRowIndex !== -1 ? rows.slice(headerRowIndex + 1) : rows;
-      const newTeams = [];
-      const skippedCount = 0;
-
-      // Create a Set of existing keys for O(1) lookup
-      // Key: "Name|University" (normalized)
-      const existingKeys = new Set(
-        teams.map(
-          (t) =>
-            `${t.name.trim().toLowerCase()}|${t.univ.trim().toLowerCase()}`,
-        ),
-      );
-
-      let addedCount = 0;
-      let duplicateCount = 0;
-
-      dataRows.forEach((row, index) => {
-        // Expected Min Length: 6 (Seq, Category, Name, Univ, Presenter, Time)
-        if (row.length < 4) return;
-
-        // Mapping based on typical structure
-        // 0:Seq, 1:Category, 2:Name, 3:Univ, 4:Presenter, 5:Time, 6:Topic
-        const category = row[1] || "";
-        const name = row[2] || "";
-        const univ = row[3] || "";
-        const presenter = row[4] || "";
-        const time = row[5] || "";
-        const topic = row[6] || "";
-
-        if (!name || !univ) return;
-
-        const key = `${name.trim().toLowerCase()}|${univ.trim().toLowerCase()}`;
-
-        if (existingKeys.has(key)) {
-          duplicateCount++;
-        } else {
-          newTeams.push({
-            id: `t${Date.now()}_${index}`,
-            seq: teams.length + addedCount + 1,
-            category,
-            name,
-            univ,
-            presenter,
-            time,
-            topic,
-            univ_en: univ, // Default fallback
-          });
-          existingKeys.add(key); // Add to set to prevent duplicates within the file itself
-          addedCount++;
-        }
-      });
-
-      if (newTeams.length > 0) {
-        const combined = [...teams, ...newTeams].map((t, idx) => ({
-          ...t,
-          seq: idx + 1,
-        }));
-        setTeams(combined);
-        alert(
-          `${t.msg_csv_success}\nAdded: ${addedCount}\nSkipped (Duplicates): ${duplicateCount}`,
+        // Identify header row
+        const headerRowIndex = rows.findIndex((row) =>
+          row.some((cell) => cell.includes("순서") || cell.includes("Order")),
         );
-      } else if (duplicateCount > 0) {
-        alert(`No new teams added.\nSkipped ${duplicateCount} duplicates.`);
+
+        const dataRows =
+          headerRowIndex !== -1 ? rows.slice(headerRowIndex + 1) : rows;
+
+        if (dataRows.length === 0) {
+          alert(t.msg_no_data || "No valid data found in CSV");
+          return;
+        }
+
+        // --- REPLACE VS MERGE LOGIC ---
+        let shouldReplace = false;
+        if (teams.length > 0) {
+          // If teams exist, ask user what to do
+          // We use a custom confirm message for now.
+          // OK = Replace, Cancel = Merge is standard "Confirm" behavior but confusing for choices.
+          // Better: confirm means "Replace", cancel means "Merge" implicitly or just cancel?
+          // The user specifically asked for "Replace".
+          // Let's use window.confirm for strict "Replace?"
+          if (
+            window.confirm(
+              "Do you want to REPLACE the entire team list with this CSV?\n\n- OK: DELETE all existing teams and use the CSV (resets order)\n- Cancel: MERGE (Append new teams to the end)",
+            )
+          ) {
+            shouldReplace = true;
+          }
+        }
+
+        let newTeamsList = [];
+        let startingSeq = 1;
+
+        if (shouldReplace) {
+          newTeamsList = []; // Start fresh
+          startingSeq = 1;
+        } else {
+          newTeamsList = [...teams]; // Keep existing
+          startingSeq = teams.length + 1;
+        }
+
+        // Set for Duplicate Checking
+        // If replacing, we only check for duplicates within the new file itself.
+        // If merging, we check against the existing list.
+        const existingKeys = new Set(
+          newTeamsList.map(
+            (t) =>
+              `${t.name.trim().toLowerCase()}|${t.univ.trim().toLowerCase()}|${t.presenter.trim().toLowerCase()}|${t.topic.trim().toLowerCase()}`,
+          ),
+        );
+
+        let addedCount = 0;
+        let duplicateCount = 0;
+
+        dataRows.forEach((row, index) => {
+          // Expected Min Length: 4 (Name, Univ at least)
+          if (row.length < 3) return;
+          // Note: Index checked was < 4 previously, but let's be safe:
+          // 0:Seq, 1:Category, 2:Name, 3:Univ...
+
+          const category = row[1] || "";
+          const name = row[2] || "";
+          const univ = row[3] || "";
+          const presenter = row[4] || "";
+          const time = row[5] || "";
+          const topic = row[6] || "";
+
+          // Strict check for minimal requirement
+          if (!name || !univ) return;
+
+          // Robust Key: Name + Univ + Presenter + Topic
+          const key = `${name.trim().toLowerCase()}|${univ.trim().toLowerCase()}|${presenter.trim().toLowerCase()}|${topic.trim().toLowerCase()}`;
+
+          // If Replace Mode: Trust the CSV even if it looks like a duplicate, UNLESS it is an EXACT duplicate row.
+          // Actually, let's keep duplicate check but update the Key to be very specific so we only skip TRUE duplicates.
+          if (existingKeys.has(key)) {
+            duplicateCount++;
+          } else {
+            newTeamsList.push({
+              id: `t${Date.now()}_${index}`,
+              seq: startingSeq + addedCount, // Correct sequence
+              category,
+              name,
+              univ,
+              presenter,
+              time,
+              topic,
+              univ_en: univ, // Default fallback
+            });
+            existingKeys.add(key);
+            addedCount++;
+          }
+        });
+
+        if (addedCount > 0 || shouldReplace) {
+          // If we replaced, we definitely need to update even if addedCount is small (e.g. replaced 100 with 10)
+          // Re-normalize sequences just in case (e.g. if duplicates were skipped in the middle)
+          const finalTeams = newTeamsList.map((t, idx) => ({
+            ...t,
+            seq: idx + 1,
+          }));
+
+          setTeams(finalTeams);
+          alert(
+            `Success!\n${shouldReplace ? "Replaced list." : "Merged list."}\nTotal Teams: ${finalTeams.length}\n(Added: ${addedCount}, Skipped Duplicates: ${duplicateCount})`,
+          );
+        } else if (duplicateCount > 0) {
+          alert(`No new teams added.\nSkipped ${duplicateCount} duplicates.`);
+        }
+      } catch (err) {
+        console.error("CSV Import Error:", err);
+        alert("Failed to parse CSV.");
       }
     };
     reader.readAsText(file);

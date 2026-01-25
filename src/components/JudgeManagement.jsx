@@ -335,7 +335,6 @@ const JudgeList = ({ judges, onDelete, onEdit, onReorder }) => {
         <div className="col-span-1">{t.header_email}</div>
         <div className="col-span-1 text-center">{t.header_pin}</div>
         <div className="col-span-1 text-center">{t.header_action}</div>
-        <div className="col-span-1 text-center">{t.header_action}</div>
       </div>
       <div className="overflow-y-auto flex-1 p-2 space-y-2 custom-scrollbar">
         {judges.length === 0 ? (
@@ -417,128 +416,151 @@ export const JudgeManagement = ({ judges, setJudges }) => {
     const reader = new FileReader();
     reader.onload = async (event) => {
       const text = event.target.result;
-      const { parseCSV } = await import("../utils/csv");
-      const rows = parseCSV(text);
 
-      console.log("CSV Loaded, total rows:", rows.length);
+      try {
+        const { parseCSV } = await import("../utils/csv");
+        const rows = parseCSV(text);
 
-      if (rows.length === 0) return;
+        console.log("CSV Loaded, total rows:", rows.length);
 
-      // Identify header row
-      const headerRowIndex = rows.findIndex((row) =>
-        row.some((cell) => cell.includes("번호") || cell.includes("Seq")),
-      );
+        if (rows.length === 0) return;
 
-      console.log("Header row index:", headerRowIndex);
+        // Identify header row
+        const headerRowIndex = rows.findIndex((row) =>
+          row.some((cell) => cell.includes("번호") || cell.includes("Seq")),
+        );
 
-      const dataRows =
-        headerRowIndex !== -1 ? rows.slice(headerRowIndex + 1) : rows;
+        console.log("Header row index:", headerRowIndex);
 
-      console.log("Data rows to process:", dataRows.length);
+        const dataRows =
+          headerRowIndex !== -1 ? rows.slice(headerRowIndex + 1) : rows;
 
-      const newJudges = [];
+        console.log("Data rows to process:", dataRows.length);
 
-      // Map for O(1) lookup of existing judges by key
-      // Key: "Name|Company"
-      const judgeMap = new Map();
-      judges.forEach((j, index) => {
-        const key = `${j.name.trim().toLowerCase()}|${j.company.trim().toLowerCase()}`;
-        judgeMap.set(key, { ...j, originalIndex: index });
-      });
+        if (dataRows.length === 0) {
+          alert(t.msg_no_data || "No valid data found in CSV");
+          return;
+        }
 
-      console.log("Existing judges map size:", judgeMap.size);
+        // --- REPLACE VS MERGE LOGIC ---
+        let shouldReplace = false;
+        if (judges.length > 0) {
+          if (
+            window.confirm(
+              "Do you want to REPLACE the entire judge list with this CSV?\n\n- OK: DELETE all existing judges and use the CSV (resets order)\n- Cancel: MERGE (Append new judges to the end)",
+            )
+          ) {
+            shouldReplace = true;
+          }
+        }
 
-      let addedCount = 0;
-      let updatedCount = 0;
-      const newJudgesList = [...judges]; // Start with clone of current
-
-      dataRows.forEach((row, index) => {
-        // Expected Min Length: 2 (Seq, Name)
-        if (row.length < 2) return;
-
-        // Mapping: 0:Seq, 1:Name, 2:Title, 3:Company, 4:Phone, 5:Email
-        const name = row[1] || "";
-        const role = row[2] || ""; // title
-        const company = row[3] || "";
-        const phone = row[4] || "";
-        const email = row[5] || "";
-
-        if (!name) return;
-
-        // Key for duplicate check
-        const key = `${name.trim().toLowerCase()}|${company.trim().toLowerCase()}`;
-        const existingJudge = judgeMap.get(key);
-
-        console.log(`Processing row ${index}:`, {
-          name,
-          company,
-          key,
-          exists: !!existingJudge,
+        // Map existing judges for Access Code preservation (Smart Replace)
+        // Key: Name + Company (Matches old logic for looking up PINs)
+        const oldJudgeMap = new Map();
+        judges.forEach((j) => {
+          const key = `${j.name.trim().toLowerCase()}|${j.company.trim().toLowerCase()}`;
+          oldJudgeMap.set(key, j);
         });
 
-        if (existingJudge) {
-          // If existing judge has no accessCode, generate one
-          if (!existingJudge.accessCode) {
-            console.log("Updating existing judge with new PIN:", name);
-            const updatedJudge = {
-              ...existingJudge,
-              accessCode: Math.floor(1000 + Math.random() * 9000).toString(),
-            };
-            // Update in the list
-            // We need to find where it is in newJudgesList (which matches 'judges' order initially)
-            // Since we might have added items, lookup via ID is safer, but here we are appending mostly.
-            // Actually, simplest is to update the object in the array directly if we can find it.
-            const listIndex = newJudgesList.findIndex(
-              (j) => j.id === existingJudge.id,
-            );
-            if (listIndex !== -1) {
-              newJudgesList[listIndex] = updatedJudge;
+        let newJudgesList = [];
+        let startingSeq = 1;
+
+        if (shouldReplace) {
+          newJudgesList = [];
+          startingSeq = 1;
+        } else {
+          newJudgesList = [...judges];
+          startingSeq = judges.length + 1;
+        }
+
+        const currentMap = new Map();
+        newJudgesList.forEach((j) => {
+          // New Strict Key for Duplicate Prevention: Name + Company + Email
+          const emailPart = j.email ? j.email.trim().toLowerCase() : "";
+          const key = `${j.name.trim().toLowerCase()}|${j.company.trim().toLowerCase()}|${emailPart}`;
+          currentMap.set(key, j);
+        });
+
+        let addedCount = 0;
+        let updatedCount = 0;
+
+        dataRows.forEach((row, index) => {
+          // Expected Min Length: 2 (Seq, Name)
+          if (row.length < 2) return;
+
+          // Mapping: 0:Seq, 1:Name, 2:Title, 3:Company, 4:Phone, 5:Email
+          const name = row[1] || "";
+          const role = row[2] || ""; // title
+          const company = row[3] || "";
+          const phone = row[4] || "";
+          const email = row[5] || "";
+
+          if (!name) return;
+
+          // Key for duplicate check: Strict
+          const emailPart = email ? email.trim().toLowerCase() : "";
+          const key = `${name.trim().toLowerCase()}|${company.trim().toLowerCase()}|${emailPart}`;
+          const existingInList = currentMap.get(key);
+
+          // Looser Key for PIN Lookup (Name + Company only)
+          const pinKey = `${name.trim().toLowerCase()}|${company.trim().toLowerCase()}`;
+
+          // If merging, we check if already in list to update/skip
+          // If replacing, we treat CSV as truth, but check if we can salvage PIN from old map
+
+          if (existingInList) {
+            // Already in the NEW list (either duplicate in CSV or was in kept list)
+            if (!existingInList.accessCode) {
+              // Fix missing PIN
+              existingInList.accessCode = Math.floor(
+                1000 + Math.random() * 9000,
+              ).toString();
               updatedCount++;
             }
           } else {
-            console.log(
-              "Judge already has PIN:",
+            // New entry for the list
+            // Try to recover PIN from old data (even if we are replacing)
+            const oldData = oldJudgeMap.get(pinKey);
+            let accessCode = oldData?.accessCode;
+            if (!accessCode) {
+              accessCode = Math.floor(1000 + Math.random() * 9000).toString();
+            }
+
+            const newJ = {
+              id: oldData ? oldData.id : `j${Date.now()}_${index}`, // Reuse ID if possible for stability
+              seq: startingSeq + addedCount,
               name,
-              existingJudge.accessCode,
-            );
+              title: role,
+              company,
+              phone,
+              email,
+              name_en: "",
+              assignedCategory: "",
+              accessCode,
+            };
+            newJudgesList.push(newJ);
+            currentMap.set(key, newJ);
+            addedCount++;
           }
+        });
+
+        if (addedCount > 0 || updatedCount > 0 || shouldReplace) {
+          // Re-sequence
+          const resequenced = newJudgesList.map((j, idx) => ({
+            ...j,
+            seq: idx + 1,
+          }));
+
+          setJudges(resequenced);
+          alert(
+            `Success!\n${shouldReplace ? "Replaced list." : "Merged list."}\nTotal Judges: ${resequenced.length}\n(Added: ${addedCount}, Updated PINs: ${updatedCount})`,
+          );
         } else {
-          // Add new
-          const newJ = {
-            id: `j${Date.now()}_${index}`,
-            seq: newJudgesList.length + 1,
-            name,
-            title: role,
-            company,
-            phone,
-            email,
-            name_en: "", // explicitly set optional fields
-            assignedCategory: "",
-            accessCode: Math.floor(1000 + Math.random() * 9000).toString(),
-          };
-          console.log("Adding new judge:", name);
-          newJudgesList.push(newJ);
-          // Add to map to prevent dupes within the same CSV file
-          judgeMap.set(key, newJ);
-          addedCount++;
+          alert("No changes made. All judges already exist and have PINs.");
         }
-      });
-
-      console.log("Added:", addedCount, "Updated:", updatedCount);
-
-      if (addedCount > 0 || updatedCount > 0) {
-        // Re-sequence
-        const resequenced = newJudgesList.map((j, idx) => ({
-          ...j,
-          seq: idx + 1,
-        }));
-
-        setJudges(resequenced);
-        alert(
-          `${t.msg_judge_csv_success}\nAdded: ${addedCount}\nUpdated Missing PINs: ${updatedCount}`,
-        );
-      } else {
-        alert("No changes made. All judges already exist and have PINs.");
+      } catch (err) {
+        console.error("Judge CSV Import Error:", err);
+        alert("Failed to parse CSV.");
       }
     };
     reader.readAsText(file);

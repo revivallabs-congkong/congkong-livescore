@@ -21,7 +21,10 @@ import {
 import { auth, db } from "../firebaseConfig";
 import { CRITERIA } from "../data";
 
-const appId = "1:642440523500:web:993b21fc1a7b05dfaaffc9";
+const appId =
+  import.meta.env.VITE_DATA_DOCUMENT_ID ||
+  import.meta.env.VITE_FIREBASE_APP_ID ||
+  "1:642440523500:web:993b21fc1a7b05dfaaffc9";
 
 const DataContext = createContext(null);
 
@@ -151,6 +154,8 @@ export const DataProvider = ({ children }) => {
       (snapshot) => {
         const data = [];
         snapshot.forEach((doc) => data.push({ id: doc.id, ...doc.data() }));
+        // Sort by sequence to ensure correct order
+        data.sort((a, b) => a.seq - b.seq);
         setTeamsState(data);
         teamsLoaded = true;
         checkLoaded();
@@ -176,6 +181,8 @@ export const DataProvider = ({ children }) => {
       (snapshot) => {
         const data = [];
         snapshot.forEach((doc) => data.push({ id: doc.id, ...doc.data() }));
+        // Sort by sequence to ensure correct order
+        data.sort((a, b) => a.seq - b.seq);
         setJudgesState(data);
         judgesLoaded = true;
         checkLoaded();
