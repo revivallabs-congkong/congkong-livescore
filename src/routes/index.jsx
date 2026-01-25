@@ -3,6 +3,7 @@ import RootLayout from "./RootLayout";
 import LoginScreen from "../screens/LoginScreen";
 import JudgeInterface from "../screens/JudgeInterface";
 import AdminDashboard from "../screens/AdminDashboard";
+import ProtectedRoute from "../components/ProtectedRoute";
 
 export const router = createBrowserRouter([
   {
@@ -15,11 +16,19 @@ export const router = createBrowserRouter([
       },
       {
         path: "judge",
-        element: <JudgeInterface />,
+        element: (
+          <ProtectedRoute allowedRole="judge">
+            <JudgeInterface />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "admin",
-        element: <AdminDashboard />,
+        element: (
+          <ProtectedRoute allowedRole="admin">
+            <AdminDashboard />
+          </ProtectedRoute>
+        ),
       },
     ],
   },

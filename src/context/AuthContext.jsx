@@ -12,11 +12,22 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [userProfile, setUserProfile] = useState(null);
+  const [userProfile, setUserProfile] = useState(() => {
+    // Lazy initialization from localStorage
+    try {
+      const saved = localStorage.getItem("user_profile");
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      console.error("Failed to parse user profile", e);
+      return null;
+    }
+  });
   const navigate = useNavigate();
 
   const login = (profile) => {
     setUserProfile(profile);
+    localStorage.setItem("user_profile", JSON.stringify(profile));
+
     // Navigate based on role
     if (profile.role === "admin") {
       navigate("/admin");
@@ -27,6 +38,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     setUserProfile(null);
+    localStorage.removeItem("user_profile");
     navigate("/");
   };
 
