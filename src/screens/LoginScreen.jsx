@@ -38,8 +38,8 @@ const LoginScreen = () => {
       return;
     }
 
-    if (accessCode === selectedJudge.accessCode) {
-      login(selectedJudge);
+    if (String(accessCode).trim() === String(selectedJudge.accessCode).trim()) {
+      login({ ...selectedJudge, role: "judge" });
     } else {
       setError("Invalid Access Code");
     }
