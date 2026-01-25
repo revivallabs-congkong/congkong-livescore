@@ -317,6 +317,7 @@ export const DataProvider = ({ children }) => {
           assignedCategory: judge.assignedCategory || "",
           assignedCategories: judge.assignedCategories || [],
           assignedTeamIds: judge.assignedTeamIds || [],
+          accessCode: judge.accessCode || "",
           // Preserve existing signature if not provided in update
           ...(judge.signature ? { signature: judge.signature } : {}),
         });

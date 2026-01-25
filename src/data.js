@@ -587,6 +587,7 @@ export const JUDGES = [
     name_en: "Ko Yoon-kyung",
     position: "수석심사역",
     company: "효성벤처스",
+    accessCode: "1234",
   },
   {
     id: "j2",
@@ -594,6 +595,7 @@ export const JUDGES = [
     name_en: "Kwon Oh-seok",
     position: "본부장",
     company: "에코프로파트너스",
+    accessCode: "5678",
   },
   {
     id: "j3",
@@ -601,6 +603,7 @@ export const JUDGES = [
     name_en: "Kim Seung-hyun",
     position: "이사",
     company: "신한벤처투자",
+    accessCode: "9012",
   },
   {
     id: "j4",
@@ -608,6 +611,7 @@ export const JUDGES = [
     name_en: "Kim Jae-ryong",
     position: "본부장",
     company: "세아기술투자",
+    accessCode: "3456",
   },
   {
     id: "j5",
@@ -615,6 +619,7 @@ export const JUDGES = [
     name_en: "Nam Beom-il",
     position: "대표",
     company: "트라이앵글 파트너스",
+    accessCode: "7890",
   },
   {
     id: "j6",
@@ -622,6 +627,7 @@ export const JUDGES = [
     name_en: "Oh Geun-tae",
     position: "교수",
     company: "수원대학교",
+    accessCode: "2345",
   },
   {
     id: "j7",
@@ -629,6 +635,7 @@ export const JUDGES = [
     name_en: "Chae I-sik",
     position: "대표",
     company: "아이디어팜",
+    accessCode: "6789",
   },
 ];
 

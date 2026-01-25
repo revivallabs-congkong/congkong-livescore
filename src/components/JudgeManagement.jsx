@@ -1,4 +1,4 @@
-import React, { useState, useRef, useContext } from "react";
+import React, { useState, useRef, useContext, useEffect } from "react";
 import {
   Plus,
   Trash2,
@@ -88,8 +88,22 @@ const AddJudgeForm = ({ onClose, onSave, initialData = null }) => {
       phone: "",
       email: "",
       assignedCategory: "",
+      accessCode: "",
     },
   );
+
+  // Auto-generate access code for new judges
+  useEffect(() => {
+    if (!initialData && !newJudge.accessCode) {
+      const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
+      setNewJudge((prev) => ({ ...prev, accessCode: randomCode }));
+    }
+  }, []);
+
+  const generateNewCode = () => {
+    const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
+    setNewJudge({ ...newJudge, accessCode: randomCode });
+  };
 
   const handleSave = () => {
     if (!newJudge.name || !newJudge.company) {
@@ -189,6 +203,29 @@ const AddJudgeForm = ({ onClose, onSave, initialData = null }) => {
             placeholder="e.g., CA, Poster, Oral (or use Assignment Manager)"
           />
         </div>
+        <div className="col-span-2">
+          <label className="block text-xs font-bold text-slate-500 mb-1">
+            Access Code (PIN)
+          </label>
+          <div className="flex gap-2">
+            <input
+              value={newJudge.accessCode || ""}
+              onChange={(e) =>
+                setNewJudge({ ...newJudge, accessCode: e.target.value })
+              }
+              className="flex-1 p-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-center tracking-widest"
+              placeholder="0000"
+              maxLength={4}
+            />
+            <button
+              onClick={generateNewCode}
+              className="px-3 py-2 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 text-xs font-bold"
+              title="Generate New PIN"
+            >
+              Generate
+            </button>
+          </div>
+        </div>
       </div>
       <div className="flex justify-end">
         <button
@@ -240,13 +277,16 @@ const SortableJudgeRow = ({ judge, onDelete, onEdit }) => {
       </div>
       <div className="col-span-2 font-bold text-slate-800">{judge.name}</div>
       <div className="col-span-2 text-sm text-slate-600">{judge.title}</div>
-      <div className="col-span-3 text-sm text-slate-600">{judge.company}</div>
+      <div className="col-span-2 text-sm text-slate-600">{judge.company}</div>
       <div className="col-span-2 text-xs text-slate-500">{judge.phone}</div>
       <div
         className="col-span-1 text-xs text-slate-500 truncate"
         title={judge.email}
       >
         {judge.email}
+      </div>
+      <div className="col-span-1 text-center font-mono text-xs font-bold bg-slate-100 rounded px-1 py-1 text-slate-600">
+        {judge.accessCode || "-"}
       </div>
       <div className="col-span-1 text-center flex justify-center gap-1">
         <button
@@ -290,9 +330,11 @@ const JudgeList = ({ judges, onDelete, onEdit, onReorder }) => {
         <div className="col-span-1 text-center">{t.header_seq}</div>
         <div className="col-span-2">{t.header_name}</div>
         <div className="col-span-2">{t.header_title}</div>
-        <div className="col-span-3">{t.header_company}</div>
+        <div className="col-span-2">{t.header_company}</div>
         <div className="col-span-2">{t.header_phone}</div>
         <div className="col-span-1">{t.header_email}</div>
+        <div className="col-span-1 text-center">PIN</div>
+        <div className="col-span-1 text-center">{t.header_action}</div>
         <div className="col-span-1 text-center">{t.header_action}</div>
       </div>
       <div className="overflow-y-auto flex-1 p-2 space-y-2 custom-scrollbar">
@@ -389,17 +431,17 @@ export const JudgeManagement = ({ judges, setJudges }) => {
         headerRowIndex !== -1 ? rows.slice(headerRowIndex + 1) : rows;
       const newJudges = [];
 
-      // Create a Set of existing keys for O(1) lookup
+      // Map for O(1) lookup of existing judges by key
       // Key: "Name|Company"
-      const existingKeys = new Set(
-        judges.map(
-          (j) =>
-            `${j.name.trim().toLowerCase()}|${j.company.trim().toLowerCase()}`,
-        ),
-      );
+      const judgeMap = new Map();
+      judges.forEach((j, index) => {
+        const key = `${j.name.trim().toLowerCase()}|${j.company.trim().toLowerCase()}`;
+        judgeMap.set(key, { ...j, originalIndex: index });
+      });
 
       let addedCount = 0;
-      let duplicateCount = 0;
+      let updatedCount = 0;
+      const newJudgesList = [...judges]; // Start with clone of current
 
       dataRows.forEach((row, index) => {
         // Expected Min Length: 2 (Seq, Name)
@@ -416,13 +458,32 @@ export const JudgeManagement = ({ judges, setJudges }) => {
 
         // Key for duplicate check
         const key = `${name.trim().toLowerCase()}|${company.trim().toLowerCase()}`;
+        const existingJudge = judgeMap.get(key);
 
-        if (existingKeys.has(key)) {
-          duplicateCount++;
+        if (existingJudge) {
+          // If existing judge has no accessCode, generate one
+          if (!existingJudge.accessCode) {
+            const updatedJudge = {
+              ...existingJudge,
+              accessCode: Math.floor(1000 + Math.random() * 9000).toString(),
+            };
+            // Update in the list
+            // We need to find where it is in newJudgesList (which matches 'judges' order initially)
+            // Since we might have added items, lookup via ID is safer, but here we are appending mostly.
+            // Actually, simplest is to update the object in the array directly if we can find it.
+            const listIndex = newJudgesList.findIndex(
+              (j) => j.id === existingJudge.id,
+            );
+            if (listIndex !== -1) {
+              newJudgesList[listIndex] = updatedJudge;
+              updatedCount++;
+            }
+          }
         } else {
-          newJudges.push({
+          // Add new
+          const newJ = {
             id: `j${Date.now()}_${index}`,
-            seq: judges.length + addedCount + 1,
+            seq: newJudgesList.length + 1,
             name,
             title: role,
             company,
@@ -430,23 +491,28 @@ export const JudgeManagement = ({ judges, setJudges }) => {
             email,
             name_en: "", // explicitly set optional fields
             assignedCategory: "",
-          });
-          existingKeys.add(key);
+            accessCode: Math.floor(1000 + Math.random() * 9000).toString(),
+          };
+          newJudgesList.push(newJ);
+          // Add to map to prevent dupes within the same CSV file
+          judgeMap.set(key, newJ);
           addedCount++;
         }
       });
 
-      if (newJudges.length > 0) {
-        const combined = [...judges, ...newJudges].map((j, idx) => ({
+      if (addedCount > 0 || updatedCount > 0) {
+        // Re-sequence
+        const resequenced = newJudgesList.map((j, idx) => ({
           ...j,
           seq: idx + 1,
         }));
-        setJudges(combined);
+
+        setJudges(resequenced);
         alert(
-          `${t.msg_judge_csv_success}\nAdded: ${addedCount}\nSkipped (Duplicates): ${duplicateCount}`,
+          `${t.msg_judge_csv_success}\nAdded: ${addedCount}\nUpdated Missing PINs: ${updatedCount}`,
         );
-      } else if (duplicateCount > 0) {
-        alert(`No new judges added.\nSkipped ${duplicateCount} duplicates.`);
+      } else {
+        alert("No changes made. All judges already exist and have PINs.");
       }
     };
     reader.readAsText(file);

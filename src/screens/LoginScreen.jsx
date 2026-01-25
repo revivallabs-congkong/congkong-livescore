@@ -19,9 +19,30 @@ const LoginScreen = () => {
   const { judges, eventSettings, isLoading } = useData();
   const { login } = useAuth();
   const [showAdmin, setShowAdmin] = useState(false);
+  const [selectedJudge, setSelectedJudge] = useState(null);
+  const [accessCode, setAccessCode] = useState("");
+  const [error, setError] = useState("");
 
-  const handleJudgeLogin = (judge) => {
-    login(judge);
+  const handleJudgeClick = (judge) => {
+    setSelectedJudge(judge);
+    setAccessCode("");
+    setError("");
+  };
+
+  const handleJudgeLogin = (e) => {
+    e.preventDefault();
+    if (!selectedJudge) return;
+
+    if (!selectedJudge.accessCode) {
+      setError("System Error: No Access Code found. Contact Admin.");
+      return;
+    }
+
+    if (accessCode === selectedJudge.accessCode) {
+      login(selectedJudge);
+    } else {
+      setError("Invalid Access Code");
+    }
   };
 
   const handleAdminLogin = () => {
@@ -114,7 +135,7 @@ const LoginScreen = () => {
             {judges.map((judge) => (
               <button
                 key={judge.id}
-                onClick={() => handleJudgeLogin(judge)}
+                onClick={() => handleJudgeClick(judge)}
                 className="w-full group flex items-center gap-4 p-3 rounded-[20px] hover:bg-slate-100  transition-all duration-300 cursor-pointer"
               >
                 <div className="w-12 h-12 rounded-full bg-linear-to-br from-slate-100 to-slate-200   flex items-center justify-center font-bold text-slate-600  shadow-inner group-hover:scale-105 transition-transform">
@@ -143,6 +164,57 @@ const LoginScreen = () => {
           </div>
         </GlassCard>
       </div>
+
+      {/* Judge PIN Modal */}
+      {selectedJudge && (
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 animate-in zoom-in-95 duration-200">
+            <h3 className="text-xl font-bold text-slate-800 mb-2">
+              Enter Access Code
+            </h3>
+            <p className="text-slate-500 mb-6 text-sm">
+              Please enter the 4-digit PIN for <b>{selectedJudge.name}</b>.
+            </p>
+
+            <form onSubmit={handleJudgeLogin}>
+              <input
+                type="password"
+                value={accessCode}
+                onChange={(e) => {
+                  setAccessCode(e.target.value);
+                  setError("");
+                }}
+                className="w-full p-3 text-center text-2xl tracking-[0.5em] font-bold border rounded-xl border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
+                placeholder="••••"
+                maxLength={4}
+                autoFocus
+              />
+
+              {error && (
+                <p className="text-red-500 text-sm text-center font-medium mb-4 animate-in slide-in-from-top-1">
+                  {error}
+                </p>
+              )}
+
+              <div className="flex gap-2 mt-4">
+                <button
+                  type="button"
+                  onClick={() => setSelectedJudge(null)}
+                  className="flex-1 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all"
+                >
+                  Login
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
