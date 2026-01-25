@@ -520,6 +520,10 @@ const JudgeInterface = () => {
                 <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[10px] font-bold  ">
                   {lang === "en" ? activeTeam.univ_en : activeTeam.univ}
                 </span>
+                <span className="font-bold text-slate-800 px-1">
+                  {activeTeam.presenter}
+                </span>
+                <span className="text-slate-300">|</span>
                 {activeTeam.topic}
               </div>
             </div>
