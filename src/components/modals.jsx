@@ -638,12 +638,21 @@ export const TeamSelectionModal = ({
         <div className="p-4 border-t border-slate-100 bg-white">
           <div className="flex justify-between items-center mb-4 text-xs font-bold text-slate-500 px-2">
             <span>{selected.length} teams selected</span>
-            <span
-              className="text-blue-600 cursor-pointer"
-              onClick={() => setSelected([])}
-            >
-              Clear All
-            </span>
+            <div className="flex gap-3">
+              <span
+                className="text-blue-600 cursor-pointer hover:underline"
+                onClick={() => setSelected(teams.map((t) => t.id))}
+              >
+                Select All
+              </span>
+              <span className="text-slate-400">|</span>
+              <span
+                className="text-blue-600 cursor-pointer hover:underline"
+                onClick={() => setSelected([])}
+              >
+                Clear All
+              </span>
+            </div>
           </div>
           <button
             onClick={handleSave}
