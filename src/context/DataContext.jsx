@@ -51,6 +51,21 @@ export const DataProvider = ({ children }) => {
   });
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
+  const [userRole, setUserRole] = useState("guest");
+
+  useEffect(() => {
+    // Initialize role from localStorage if available (handled by AuthContext mostly but good as backup)
+    try {
+      const savedProfile = localStorage.getItem("user_profile");
+      if (savedProfile) {
+        const profile = JSON.parse(savedProfile);
+        if (profile.role) setUserRole(profile.role);
+      }
+    } catch (e) {
+      console.error("Error parsing user profile for role:", e);
+    }
+  }, []);
+
   useEffect(() => {
     const init = async () => {
       try {
@@ -123,7 +138,7 @@ export const DataProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    if (!user) return;
+    // if (!user) return; // Allow loading initial data even if auth is establishing (anonymous)
 
     // Track loading state for initial data fetch
     let teamsLoaded = false;
@@ -248,7 +263,7 @@ export const DataProvider = ({ children }) => {
       unsubControl();
       unsubEventSettings();
     };
-  }, [user]);
+  }, [user]); // Keep user dependency for re-establishing connections if auth changes
 
   // Action handlers
   const handleUpdateTeams = async (newTeams) => {
@@ -589,20 +604,44 @@ export const DataProvider = ({ children }) => {
 
   // Optimized score subscription based on judge profile
   useEffect(() => {
-    if (!user || !judges.length) return;
+    if (!user) return;
 
-    // Find current judge profile from judges
-    const currentJudge =
-      judges.find((j) => j.id === user.uid) ||
-      judges.find((j) => j.email === user.email);
+    let scoresQuery;
 
-    if (!currentJudge) return;
+    // Check if admin
+    if (userRole === "admin") {
+      console.log("Admin role detected: Subscribing to ALL scores");
+      scoresQuery = collection(
+        db,
+        "artifacts",
+        appId,
+        "public",
+        "data",
+        "scores",
+      );
+    }
+    // Otherwise check for judge profile match
+    else if (judges.length > 0) {
+      // Find current judge profile from judges
+      const currentJudge =
+        judges.find((j) => j.id === user.uid) ||
+        judges.find((j) => j.email === user.email);
 
-    // Subscribe only to scores where judgeId matches current judge
-    const scoresQuery = query(
-      collection(db, "artifacts", appId, "public", "data", "scores"),
-      where("judgeId", "==", currentJudge.id),
-    );
+      if (currentJudge) {
+        console.log(
+          "Judge detected:",
+          currentJudge.name,
+          "- Subscribing to OWN scores",
+        );
+        // Subscribe only to scores where judgeId matches current judge
+        scoresQuery = query(
+          collection(db, "artifacts", appId, "public", "data", "scores"),
+          where("judgeId", "==", currentJudge.id),
+        );
+      }
+    }
+
+    if (!scoresQuery) return;
 
     const unsub = onSnapshot(
       scoresQuery,
@@ -613,7 +652,7 @@ export const DataProvider = ({ children }) => {
           const id = `${scoreData.teamId}_${scoreData.judgeId}`;
           data[id] = scoreData;
         });
-        setScores(data);
+        setScores(data); // Admin will have all, judge will have theirs. Logic handles this.
       },
       (error) => {
         console.error("Error fetching scores:", error);
@@ -621,7 +660,7 @@ export const DataProvider = ({ children }) => {
     );
 
     return unsub;
-  }, [user, judges]);
+  }, [user, judges, userRole]);
 
   const handleResetScores = async () => {
     if (!user) return;
@@ -671,6 +710,7 @@ export const DataProvider = ({ children }) => {
     onSystemReset: handleSystemReset,
     onScoresReset: handleResetScores,
     saveJudgeSignature: handleSaveJudgeSignature,
+    setUserRole,
   };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;

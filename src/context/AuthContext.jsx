@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useData } from "./DataContext";
 
 const AuthContext = createContext(null);
 
@@ -12,6 +13,7 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
+  const { setUserRole } = useData();
   const [userProfile, setUserProfile] = useState(() => {
     // Lazy initialization from localStorage
     try {
@@ -26,6 +28,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = (profile) => {
     setUserProfile(profile);
+    setUserRole(profile.role);
     localStorage.setItem("user_profile", JSON.stringify(profile));
 
     // Navigate based on role
@@ -38,6 +41,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     setUserProfile(null);
+    setUserRole("guest");
     localStorage.removeItem("user_profile");
     navigate("/");
   };
