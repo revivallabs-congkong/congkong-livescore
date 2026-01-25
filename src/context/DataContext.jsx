@@ -182,7 +182,7 @@ export const DataProvider = ({ children }) => {
         const data = [];
         snapshot.forEach((doc) => data.push({ id: doc.id, ...doc.data() }));
         // Sort by sequence to ensure correct order
-        data.sort((a, b) => a.seq - b.seq);
+        data.sort((a, b) => Number(a.seq) - Number(b.seq));
         setJudgesState(data);
         judgesLoaded = true;
         checkLoaded();
@@ -319,6 +319,7 @@ export const DataProvider = ({ children }) => {
         const docRef = doc(judgesRef, judge.id);
         batch.set(docRef, {
           name: judge.name || "",
+          seq: judge.seq || 0,
           name_en: judge.name_en || "",
           company: judge.company || "",
           assignedCategory: judge.assignedCategory || "",
