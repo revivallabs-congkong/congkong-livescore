@@ -33,3 +33,6 @@ judge_sample.csv
 team_sample.csv
 
 .DS_Store
+
+scripts
+backup
