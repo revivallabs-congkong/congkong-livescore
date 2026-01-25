@@ -299,6 +299,8 @@ export const DICTIONARY = {
     // Judge Filters
     search_placeholder: "팀 검색...",
     filter_all: "전체",
+    select_all: "전체 선택",
+    clear_all: "전체 해제",
 
     // Admin Header & Nav
     session_timer: "세션 타이머",
@@ -569,6 +571,8 @@ export const DICTIONARY = {
     // Judge Filters
     search_placeholder: "Search Team...",
     filter_all: "All",
+    select_all: "Select All",
+    clear_all: "Clear All",
 
     // Admin Header & Nav
     session_timer: "Session Timer",

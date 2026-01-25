@@ -638,20 +638,21 @@ export const TeamSelectionModal = ({
         <div className="p-4 border-t border-slate-100 bg-white">
           <div className="flex justify-between items-center mb-4 text-xs font-bold text-slate-500 px-2">
             <span>{selected.length} teams selected</span>
-            <div className="flex gap-3">
-              <span
-                className="text-blue-600 cursor-pointer hover:underline"
+            <div className="flex gap-2">
+              <button
+                type="button"
+                className="text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
                 onClick={() => setSelected(teams.map((t) => t.id))}
               >
-                Select All
-              </span>
-              <span className="text-slate-400">|</span>
-              <span
-                className="text-blue-600 cursor-pointer hover:underline"
+                {t.select_all}
+              </button>
+              <button
+                type="button"
+                className="text-xs font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
                 onClick={() => setSelected([])}
               >
-                Clear All
-              </span>
+                {t.clear_all}
+              </button>
             </div>
           </div>
           <button
