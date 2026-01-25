@@ -642,7 +642,11 @@ export const TeamSelectionModal = ({
               <button
                 type="button"
                 className="text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
-                onClick={() => setSelected(teams.map((t) => t.id))}
+                onClick={() =>
+                  setSelected((prev) => [
+                    ...new Set([...prev, ...filteredTeams.map((t) => t.id)]),
+                  ])
+                }
               >
                 {t.select_all}
               </button>
