@@ -314,6 +314,10 @@ export const DICTIONARY = {
     nav_event: "행사 설정",
     nav_criteria: "평가 기준",
     nav_scoring: "채점 방식",
+
+    // Judge Empty State
+    select_team_title: "심사 준비",
+    select_team_desc: "좌측 목록에서 채점할 팀을 선택해주세요.",
   },
   en: {
     app_title: "'25 Tech Biz",
@@ -586,6 +590,11 @@ export const DICTIONARY = {
     nav_event: "Event",
     nav_criteria: "Criteria",
     nav_scoring: "Scoring",
+
+    // Judge Empty State
+    select_team_title: "Ready to Score",
+    select_team_desc:
+      "Please select a team from the list on the left to start scoring.",
   },
 };
 
