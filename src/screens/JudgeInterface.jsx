@@ -43,7 +43,7 @@ const JudgeInterface = () => {
     return judges.find((j) => j.id === userProfile.id) || userProfile;
   }, [judges, userProfile]);
 
-  const [activeTeamId, setActiveTeamId] = useState(teams?.[0]?.id);
+  const [activeTeamId, setActiveTeamId] = useState(null);
   const [localScore, setLocalScore] = useState({});
   const [memo, setMemo] = useState("");
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -152,14 +152,12 @@ const JudgeInterface = () => {
 
   // Set initial activeTeamId when teams load
   useEffect(() => {
-    // If no active team is selected, select the first one from the display list (or assigned list)
-    if (assignedTeams.length > 0 && !activeTeamId) {
-      if (assignedTeams[0]) setActiveTeamId(assignedTeams[0].id);
-    }
+    // If no active team is selected, DO NOT auto-select. Wait for user.
+    // However, if there was a PREVIOUS selection that is no longer valid (e.g. filtered out), we might want to clear it?
+    // For now, simple removal of auto-select logic.
   }, [assignedTeams, activeTeamId]);
 
-  const activeTeam =
-    assignedTeams.find((t) => t.id === activeTeamId) || assignedTeams[0] || {};
+  const activeTeam = assignedTeams.find((t) => t.id === activeTeamId) || null;
   const currentKey = judge ? `${activeTeamId}_${judge.id}` : null;
   const savedData = currentKey ? scores[currentKey] : null;
 
@@ -281,7 +279,8 @@ const JudgeInterface = () => {
   };
 
   // Show loading spinner while data is loading
-  if (isLoading || !judge || !activeTeam) {
+  // NOTE: We allow !activeTeam now (empty state)
+  if (isLoading || !judge) {
     return (
       <div className="h-screen bg-[#F5F5F7] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
@@ -503,192 +502,213 @@ const JudgeInterface = () => {
         </div>
 
         {/* Main */}
-        <main className="flex-1 flex flex-col min-w-0 bg-white/50  backdrop-blur-md rounded-[24px] border border-white/20 shadow-sm overflow-hidden relative">
-          <div className="p-6 pb-0 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <h1 className="text-2xl font-bold tracking-tight">
-                  {activeTeam.name}
-                </h1>
-                {control?.activeTeamId === activeTeamId && (
-                  <span className="bg-red-100 text-red-600   px-2 py-0.5 rounded-full text-[10px] font-bold animate-pulse flex items-center gap-1">
-                    <MonitorPlay className="w-3 h-3" /> LIVE
-                  </span>
-                )}
+        <main className="flex-1 flex flex-col min-w-0 bg-white/50 backdrop-blur-md rounded-[24px] border border-white/20 shadow-sm overflow-hidden relative">
+          {!activeTeam ? (
+            <div className="flex-1 flex flex-col items-center justify-center text-slate-400 p-8 text-center animate-in fade-in zoom-in-95 duration-500">
+              <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-6 shadow-inner">
+                <MonitorPlay className="w-10 h-10 text-slate-300" />
               </div>
-              <div className="text-sm text-slate-500 font-medium mt-1 flex items-center gap-2">
-                {activeTeam.category && (
-                  <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[10px] font-bold">
-                    {activeTeam.category}
-                  </span>
-                )}
-                <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[10px] font-bold  ">
-                  {lang === "en" ? activeTeam.univ_en : activeTeam.univ}
-                </span>
-                <span className="font-bold text-slate-800 px-1">
-                  {activeTeam.presenter}
-                </span>
-                <span className="text-slate-300">|</span>
-                {activeTeam.topic}
-              </div>
+              <h2 className="text-2xl font-bold text-slate-600 mb-2">
+                {t.select_team_title || "Ready to Score"}
+              </h2>
+              <p className="max-w-md text-slate-500">
+                {t.select_team_desc ||
+                  "Please select a team from the list on the left to start scoring."}
+              </p>
             </div>
-            <div className="flex items-center gap-4 w-full lg:w-auto justify-between lg:justify-end">
-              <SettingsBar />
-              <div className="px-3 py-1 bg-slate-100  rounded-full text-xs font-bold text-slate-500">
-                {activeTeam?.seq} / {assignedTeams.length}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex-1 overflow-y-auto p-6 pb-24 scroll-smooth">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="space-y-6">
-                {criteriaData.length > 0
-                  ? criteriaData.map((cat) => (
-                      <GlassCard key={cat.id} className="p-5">
-                        <div className="flex items-center gap-2 mb-4">
-                          <div
-                            className={`w-1 h-4 rounded-full ${cat.id === "cat_creativity" ? "bg-blue-500" : cat.id === "cat_market" ? "bg-purple-500" : "bg-amber-500"}`}
-                          />
-                          <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500">
-                            {lang === "en" ? cat.label_en : cat.label}
-                          </h3>
-                        </div>
-                        <div className="space-y-4">
-                          {cat.items.map((crit) => (
-                            <AppleSlider
-                              key={crit.id}
-                              label={lang === "en" ? crit.label_en : crit.label}
-                              desc={crit.desc}
-                              max={crit.max}
-                              value={localScore[crit.id] || 0}
-                              onChange={(val) =>
-                                handleScoreChange(crit.id, val)
-                              }
-                              disabled={isLocked}
-                            />
-                          ))}
-                        </div>
-                      </GlassCard>
-                    ))
-                  : Object.entries(
-                      CRITERIA.reduce((groups, c) => {
-                        if (!groups[c.category]) groups[c.category] = [];
-                        groups[c.category].push(c);
-                        return groups;
-                      }, {}),
-                    ).map(([category, items]) => (
-                      <GlassCard key={category} className="p-5">
-                        <div className="flex items-center gap-2 mb-4">
-                          <div className="w-1 h-4 rounded-full bg-slate-300" />
-                          <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500">
-                            {t[category]}
-                          </h3>
-                        </div>
-                        <div className="space-y-4">
-                          {items.map((crit) => (
-                            <AppleSlider
-                              key={crit.id}
-                              label={lang === "en" ? crit.label_en : crit.label}
-                              desc={crit.desc}
-                              max={crit.max}
-                              value={localScore[crit.id] || 0}
-                              onChange={(val) =>
-                                handleScoreChange(crit.id, val)
-                              }
-                              disabled={isLocked}
-                            />
-                          ))}
-                        </div>
-                      </GlassCard>
-                    ))}
-              </div>
-
-              <div className="space-y-6">
-                <GlassCard className="p-5 flex flex-col h-[280px]">
-                  <div className="flex justify-between items-center mb-3">
-                    <h3 className="font-bold text-sm flex items-center gap-2">
-                      <PenTool className="w-4 h-4 text-blue-500" />{" "}
-                      {t.comment_placeholder}
-                    </h3>
-                    <button
-                      onClick={() => setShowAI(!showAI)}
-                      className="text-[10px] bg-slate-100  px-2 py-1 rounded-md font-bold flex items-center gap-1 hover:bg-blue-50  hover:text-blue-500 transition-colors cursor-pointer"
-                    >
-                      <Sparkles className="w-3 h-3" /> {t.ai_analysis}
-                    </button>
-                  </div>
-                  {showAI && (
-                    <div className="mb-3 p-3 bg-blue-50  rounded-xl text-xs text-blue-700  animate-in slide-in-from-top-2">
-                      <strong>{t.ai_insight}:</strong> {t.ai_msg}
-                    </div>
-                  )}
-                  <textarea
-                    value={memo}
-                    onChange={(e) => setMemo(e.target.value)}
-                    placeholder={t.comment_placeholder}
-                    disabled={isLocked}
-                    className={`flex-1 w-full p-4 bg-transparent border-none focus:ring-0 text-sm resize-none placeholder:text-slate-300 leading-relaxed ${isLocked ? "cursor-not-allowed text-slate-400" : ""}`}
-                  />
-                </GlassCard>
-
-                <div
-                  className={`p-6 rounded-[24px] text-white shadow-xl flex items-center justify-between relative overflow-hidden transition-all duration-300 ${isLocked ? "bg-slate-400 grayscale" : "bg-linear-to-br from-blue-600 to-indigo-700"}`}
-                >
-                  <div className="relative z-10">
-                    <div className="text-xs font-bold opacity-70 uppercase mb-1">
-                      {t.score_total}
-                    </div>
-                    <div className="text-5xl font-black tracking-tighter">
-                      {totalScore}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={handlePreSubmit}
-                      disabled={isLocked || saveStatus === "saving"}
-                      className={`relative z-10 bg-white text-blue-600 px-6 py-3 rounded-xl font-bold text-sm shadow-lg transition-all ${isLocked || saveStatus === "saving" ? "opacity-50 cursor-not-allowed" : "hover:scale-105 active:scale-95 cursor-pointer"} flex items-center gap-2`}
-                    >
-                      {saveStatus === "saving" && (
-                        <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                      )}
-                      {isLocked
-                        ? t.locked || "Locked"
-                        : saveStatus === "saving"
-                          ? t.status_saving || "Saving..."
-                          : savedData
-                            ? t.update
-                            : t.submit}
-                    </button>
-
-                    {/* Reuse Signature Button */}
-                    {!isLocked && judge.signature && (
-                      <button
-                        onClick={() =>
-                          handleSignatureSubmit("PROFILE_REF", false)
-                        }
-                        disabled={saveStatus === "saving"}
-                        className={`relative z-10 bg-linear-to-br from-amber-300 to-orange-500 hover:from-amber-400 hover:to-orange-600 text-white px-5 py-2 rounded-xl font-bold text-xs shadow-[0_4px_12px_rgba(245,158,11,0.4)] transition-all ml-3 cursor-pointer flex flex-col items-center justify-center leading-none gap-0.5 border border-white/20 active:scale-95 hover:scale-105 group overflow-hidden ${saveStatus === "saving" ? "opacity-50 cursor-not-allowed" : ""}`}
-                        title={t.use_saved_signature}
-                      >
-                        <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 rounded-xl"></div>
-                        <div className="flex items-center gap-1 opacity-90 text-[10px] uppercase tracking-wider font-extrabold text-amber-100">
-                          <Zap className="w-3 h-3 fill-amber-100" />{" "}
-                          {t.btn_quick}
-                        </div>
-                        <span className="text-sm font-black drop-shadow-sm">
-                          {t.btn_sign}
-                        </span>
-                      </button>
+          ) : (
+            <>
+              <div className="p-6 pb-0 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h1 className="text-2xl font-bold tracking-tight">
+                      {activeTeam.name}
+                    </h1>
+                    {control?.activeTeamId === activeTeamId && (
+                      <span className="bg-red-100 text-red-600   px-2 py-0.5 rounded-full text-[10px] font-bold animate-pulse flex items-center gap-1">
+                        <MonitorPlay className="w-3 h-3" /> LIVE
+                      </span>
                     )}
                   </div>
-                  <div className="absolute right-0 bottom-0 opacity-10 pointer-events-none transform translate-x-4 translate-y-4">
-                    <Crown className="w-32 h-32" />
+                  <div className="text-sm text-slate-500 font-medium mt-1 flex items-center gap-2">
+                    {activeTeam.category && (
+                      <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[10px] font-bold">
+                        {activeTeam.category}
+                      </span>
+                    )}
+                    <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[10px] font-bold  ">
+                      {lang === "en" ? activeTeam.univ_en : activeTeam.univ}
+                    </span>
+                    <span className="font-bold text-slate-800 px-1">
+                      {activeTeam.presenter}
+                    </span>
+                    <span className="text-slate-300">|</span>
+                    {activeTeam.topic}
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 w-full lg:w-auto justify-between lg:justify-end">
+                  <SettingsBar />
+                  <div className="px-3 py-1 bg-slate-100  rounded-full text-xs font-bold text-slate-500">
+                    {activeTeam?.seq} / {assignedTeams.length}
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
+
+              <div className="flex-1 overflow-y-auto p-6 pb-24 scroll-smooth">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="space-y-6">
+                    {criteriaData.length > 0
+                      ? criteriaData.map((cat) => (
+                          <GlassCard key={cat.id} className="p-5">
+                            <div className="flex items-center gap-2 mb-4">
+                              <div
+                                className={`w-1 h-4 rounded-full ${cat.id === "cat_creativity" ? "bg-blue-500" : cat.id === "cat_market" ? "bg-purple-500" : "bg-amber-500"}`}
+                              />
+                              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500">
+                                {lang === "en" ? cat.label_en : cat.label}
+                              </h3>
+                            </div>
+                            <div className="space-y-4">
+                              {cat.items.map((crit) => (
+                                <AppleSlider
+                                  key={crit.id}
+                                  label={
+                                    lang === "en" ? crit.label_en : crit.label
+                                  }
+                                  desc={crit.desc}
+                                  max={crit.max}
+                                  value={localScore[crit.id] || 0}
+                                  onChange={(val) =>
+                                    handleScoreChange(crit.id, val)
+                                  }
+                                  disabled={isLocked}
+                                />
+                              ))}
+                            </div>
+                          </GlassCard>
+                        ))
+                      : Object.entries(
+                          CRITERIA.reduce((groups, c) => {
+                            if (!groups[c.category]) groups[c.category] = [];
+                            groups[c.category].push(c);
+                            return groups;
+                          }, {}),
+                        ).map(([category, items]) => (
+                          <GlassCard key={category} className="p-5">
+                            <div className="flex items-center gap-2 mb-4">
+                              <div className="w-1 h-4 rounded-full bg-slate-300" />
+                              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500">
+                                {t[category]}
+                              </h3>
+                            </div>
+                            <div className="space-y-4">
+                              {items.map((crit) => (
+                                <AppleSlider
+                                  key={crit.id}
+                                  label={
+                                    lang === "en" ? crit.label_en : crit.label
+                                  }
+                                  desc={crit.desc}
+                                  max={crit.max}
+                                  value={localScore[crit.id] || 0}
+                                  onChange={(val) =>
+                                    handleScoreChange(crit.id, val)
+                                  }
+                                  disabled={isLocked}
+                                />
+                              ))}
+                            </div>
+                          </GlassCard>
+                        ))}
+                  </div>
+
+                  <div className="space-y-6">
+                    <GlassCard className="p-5 flex flex-col h-[280px]">
+                      <div className="flex justify-between items-center mb-3">
+                        <h3 className="font-bold text-sm flex items-center gap-2">
+                          <PenTool className="w-4 h-4 text-blue-500" />{" "}
+                          {t.comment_placeholder}
+                        </h3>
+                        <button
+                          onClick={() => setShowAI(!showAI)}
+                          className="text-[10px] bg-slate-100  px-2 py-1 rounded-md font-bold flex items-center gap-1 hover:bg-blue-50  hover:text-blue-500 transition-colors cursor-pointer"
+                        >
+                          <Sparkles className="w-3 h-3" /> {t.ai_analysis}
+                        </button>
+                      </div>
+                      {showAI && (
+                        <div className="mb-3 p-3 bg-blue-50  rounded-xl text-xs text-blue-700  animate-in slide-in-from-top-2">
+                          <strong>{t.ai_insight}:</strong> {t.ai_msg}
+                        </div>
+                      )}
+                      <textarea
+                        value={memo}
+                        onChange={(e) => setMemo(e.target.value)}
+                        placeholder={t.comment_placeholder}
+                        disabled={isLocked}
+                        className={`flex-1 w-full p-4 bg-transparent border-none focus:ring-0 text-sm resize-none placeholder:text-slate-300 leading-relaxed ${isLocked ? "cursor-not-allowed text-slate-400" : ""}`}
+                      />
+                    </GlassCard>
+
+                    <div
+                      className={`p-6 rounded-[24px] text-white shadow-xl flex items-center justify-between relative overflow-hidden transition-all duration-300 ${isLocked ? "bg-slate-400 grayscale" : "bg-linear-to-br from-blue-600 to-indigo-700"}`}
+                    >
+                      <div className="relative z-10">
+                        <div className="text-xs font-bold opacity-70 uppercase mb-1">
+                          {t.score_total}
+                        </div>
+                        <div className="text-5xl font-black tracking-tighter">
+                          {totalScore}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={handlePreSubmit}
+                          disabled={isLocked || saveStatus === "saving"}
+                          className={`relative z-10 bg-white text-blue-600 px-6 py-3 rounded-xl font-bold text-sm shadow-lg transition-all ${isLocked || saveStatus === "saving" ? "opacity-50 cursor-not-allowed" : "hover:scale-105 active:scale-95 cursor-pointer"} flex items-center gap-2`}
+                        >
+                          {saveStatus === "saving" && (
+                            <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                          )}
+                          {isLocked
+                            ? t.locked || "Locked"
+                            : saveStatus === "saving"
+                              ? t.status_saving || "Saving..."
+                              : savedData
+                                ? t.update
+                                : t.submit}
+                        </button>
+
+                        {/* Reuse Signature Button */}
+                        {!isLocked && judge.signature && (
+                          <button
+                            onClick={() =>
+                              handleSignatureSubmit("PROFILE_REF", false)
+                            }
+                            disabled={saveStatus === "saving"}
+                            className={`relative z-10 bg-linear-to-br from-amber-300 to-orange-500 hover:from-amber-400 hover:to-orange-600 text-white px-5 py-2 rounded-xl font-bold text-xs shadow-[0_4px_12px_rgba(245,158,11,0.4)] transition-all ml-3 cursor-pointer flex flex-col items-center justify-center leading-none gap-0.5 border border-white/20 active:scale-95 hover:scale-105 group overflow-hidden ${saveStatus === "saving" ? "opacity-50 cursor-not-allowed" : ""}`}
+                            title={t.use_saved_signature}
+                          >
+                            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 rounded-xl"></div>
+                            <div className="flex items-center gap-1 opacity-90 text-[10px] uppercase tracking-wider font-extrabold text-amber-100">
+                              <Zap className="w-3 h-3 fill-amber-100" />{" "}
+                              {t.btn_quick}
+                            </div>
+                            <span className="text-sm font-black drop-shadow-sm">
+                              {t.btn_sign}
+                            </span>
+                          </button>
+                        )}
+                      </div>
+                      <div className="absolute right-0 bottom-0 opacity-10 pointer-events-none transform translate-x-4 translate-y-4">
+                        <Crown className="w-32 h-32" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
         </main>
       </div>
     </div>
