@@ -26,6 +26,7 @@ const JudgeInterface = () => {
   const { t, lang } = useContext(AppContext);
   const {
     teams,
+    judges,
     scores,
     control,
     eventSettings,
@@ -36,7 +37,11 @@ const JudgeInterface = () => {
   } = useData();
   const { userProfile, logout } = useAuth();
 
-  const judge = userProfile;
+  // Use live data from DataContext if available, otherwise fallback to local profile
+  const judge = useMemo(() => {
+    if (!userProfile) return null;
+    return judges.find((j) => j.id === userProfile.id) || userProfile;
+  }, [judges, userProfile]);
 
   const [activeTeamId, setActiveTeamId] = useState(teams?.[0]?.id);
   const [localScore, setLocalScore] = useState({});
