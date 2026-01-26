@@ -13,7 +13,7 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const { setUserRole } = useData();
+  const { setUserRole, setUserId } = useData();
   const [userProfile, setUserProfile] = useState(() => {
     // Lazy initialization from localStorage
     try {
@@ -26,9 +26,18 @@ export const AuthProvider = ({ children }) => {
   });
   const navigate = useNavigate();
 
+  // Sync state to DataContext on mount/update (persistence backup)
+  useEffect(() => {
+    if (userProfile) {
+      if (userProfile.role) setUserRole(userProfile.role);
+      if (userProfile.id) setUserId(userProfile.id);
+    }
+  }, [userProfile, setUserRole, setUserId]);
+
   const login = (profile) => {
     setUserProfile(profile);
     setUserRole(profile.role);
+    setUserId(profile.id);
     localStorage.setItem("user_profile", JSON.stringify(profile));
 
     // Navigate based on role
@@ -42,6 +51,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUserProfile(null);
     setUserRole("guest");
+    setUserId(null);
     localStorage.removeItem("user_profile");
     navigate("/");
   };

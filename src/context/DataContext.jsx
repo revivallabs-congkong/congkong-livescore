@@ -52,14 +52,16 @@ export const DataProvider = ({ children }) => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
   const [userRole, setUserRole] = useState("guest");
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
-    // Initialize role from localStorage if available (handled by AuthContext mostly but good as backup)
+    // Initialize role and userId from localStorage if available
     try {
       const savedProfile = localStorage.getItem("user_profile");
       if (savedProfile) {
         const profile = JSON.parse(savedProfile);
         if (profile.role) setUserRole(profile.role);
+        if (profile.id) setUserId(profile.id);
       }
     } catch (e) {
       console.error("Error parsing user profile for role:", e);
@@ -604,7 +606,10 @@ export const DataProvider = ({ children }) => {
 
   // Optimized score subscription based on judge profile
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      // console.log("Score Sub: No user yet");
+      return;
+    }
 
     let scoresQuery;
 
@@ -622,10 +627,27 @@ export const DataProvider = ({ children }) => {
     }
     // Otherwise check for judge profile match
     else if (judges.length > 0) {
-      // Find current judge profile from judges
-      const currentJudge =
-        judges.find((j) => j.id === user.uid) ||
-        judges.find((j) => j.email === user.email);
+      // Find current judge profile from judges - TRY USER ID FIRST
+      // This is crucial for refresh where user.uid (Firebase) != judge.id (App)
+      let currentJudge;
+
+      if (userId) {
+        currentJudge = judges.find((j) => j.id === userId);
+      }
+
+      if (!currentJudge) {
+        currentJudge =
+          judges.find((j) => j.id === user.uid) ||
+          judges.find((j) => j.email === user.email);
+      }
+
+      console.log("Score Sub Check:", {
+        userId,
+        firebaseUid: user.uid,
+        judgesCount: judges.length,
+        foundJudge: currentJudge ? currentJudge.name : "None",
+        userRole,
+      });
 
       if (currentJudge) {
         console.log(
@@ -638,7 +660,11 @@ export const DataProvider = ({ children }) => {
           collection(db, "artifacts", appId, "public", "data", "scores"),
           where("judgeId", "==", currentJudge.id),
         );
+      } else {
+        console.warn("User logged in but no matching judge profile found yet.");
       }
+    } else {
+      // console.log("Score Sub: Waiting for judges list...");
     }
 
     if (!scoresQuery) return;
@@ -652,7 +678,8 @@ export const DataProvider = ({ children }) => {
           const id = `${scoreData.teamId}_${scoreData.judgeId}`;
           data[id] = scoreData;
         });
-        setScores(data); // Admin will have all, judge will have theirs. Logic handles this.
+        console.log(`Scores updated: ${Object.keys(data).length} records`);
+        setScores(data);
       },
       (error) => {
         console.error("Error fetching scores:", error);
@@ -660,7 +687,7 @@ export const DataProvider = ({ children }) => {
     );
 
     return unsub;
-  }, [user, judges, userRole]);
+  }, [user, judges, userRole, userId]);
 
   const handleResetScores = async () => {
     if (!user) return;
@@ -711,6 +738,7 @@ export const DataProvider = ({ children }) => {
     onScoresReset: handleResetScores,
     saveJudgeSignature: handleSaveJudgeSignature,
     setUserRole,
+    setUserId,
   };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
