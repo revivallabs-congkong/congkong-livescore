@@ -34,6 +34,55 @@ import { ScoringSettings } from "../components/ScoringSettings";
 import { AssignmentManager } from "../components/AssignmentManager";
 import { calculateFinalScore } from "../utils/scoring";
 
+// Helper: Check if a judge is assigned to a team
+const isJudgeAssignedToTeam = (judge, team) => {
+  const categories = Array.isArray(judge.assignedCategories)
+    ? judge.assignedCategories
+    : judge.assignedCategory
+      ? [judge.assignedCategory]
+      : [];
+  const specificTeamIds = judge.assignedTeamIds || [];
+
+  const hasSpecific = specificTeamIds.length > 0;
+  const hasCategories = categories.length > 0;
+
+  // If no specific assignments, they judge EVERYONE (default behavior)
+  if (!hasSpecific && !hasCategories) return true;
+
+  // Otherwise, strict check (Union of Categories OR Specific Teams)
+  if (hasCategories && categories.includes(team.category)) return true;
+  if (hasSpecific && specificTeamIds.includes(team.id)) return true;
+
+  return false;
+};
+
+// Helper: Get assignment label
+const getJudgeAssignmentLabel = (judge) => {
+  const categories = Array.isArray(judge.assignedCategories)
+    ? judge.assignedCategories
+    : judge.assignedCategory
+      ? [judge.assignedCategory]
+      : [];
+  const specificTeamIds = judge.assignedTeamIds || [];
+
+  if (categories.length === 0 && specificTeamIds.length === 0)
+    return "All Teams";
+
+  const parts = [];
+  if (categories.length > 0) parts.push(...categories);
+
+  if (specificTeamIds.length > 0) {
+    const countLabel = `${specificTeamIds.length} Team${specificTeamIds.length > 1 ? "s" : ""}`;
+    if (parts.length > 0) {
+      parts.push(`+${countLabel}`);
+    } else {
+      parts.push(countLabel);
+    }
+  }
+
+  return parts.join(", ");
+};
+
 const AdminDashboard = () => {
   const { t, lang } = useContext(AppContext);
   const {
@@ -64,12 +113,24 @@ const AdminDashboard = () => {
   );
 
   const stats = useMemo(() => {
+    // Calculate total expected votes based on assignments
+    let totalExpectedVotes = 0;
+    teams.forEach((t) => {
+      const assignedJudgesCount = judges.filter((j) =>
+        isJudgeAssignedToTeam(j, t),
+      ).length;
+      totalExpectedVotes += assignedJudgesCount;
+    });
+
     const totalVotes = Object.keys(scores).length;
-    const progress = Math.round(
-      (totalVotes / (teams.length * judges.length)) * 100,
-    );
+    const progress =
+      totalExpectedVotes > 0
+        ? Math.round((totalVotes / totalExpectedVotes) * 100)
+        : 0;
 
     const teamJudgedData = teams.map((t) => {
+      const assignedJudges = judges.filter((j) => isJudgeAssignedToTeam(j, t));
+
       const tScores = judges
         .map((j) => scores[`${t.id}_${j.id}`])
         .filter(Boolean);
@@ -100,6 +161,8 @@ const AdminDashboard = () => {
         mktScore,
         creScore,
         count: tScores.length,
+        assignedJudges,
+        assignedJudgesCount: assignedJudges.length,
       };
     });
 
@@ -579,12 +642,18 @@ const AdminDashboard = () => {
                     );
                     const isLocked = control?.globalLock && !isUnlocked;
 
-                    const completedCount = Object.keys(scores).filter((k) =>
-                      k.includes(judge.id),
-                    ).length;
-                    const progress = Math.round(
-                      (completedCount / teams.length) * 100,
+                    const assignedTeams = teams.filter((t) =>
+                      isJudgeAssignedToTeam(judge, t),
                     );
+                    const completedCount = assignedTeams.filter(
+                      (t) => scores[`${t.id}_${judge.id}`],
+                    ).length;
+                    const progress =
+                      assignedTeams.length > 0
+                        ? Math.round(
+                            (completedCount / assignedTeams.length) * 100,
+                          )
+                        : 0;
 
                     return (
                       <div
@@ -592,7 +661,7 @@ const AdminDashboard = () => {
                         className="flex justify-between items-center bg-white p-3 rounded-lg border border-slate-100 shadow-sm"
                       >
                         <div className="flex flex-col min-w-0 flex-1 mr-3">
-                          <div className="flex items-center gap-2 mb-1">
+                          <div className="flex items-center gap-2 mb-0.5">
                             <span className="text-xs font-bold text-slate-700 truncate">
                               {judge.name}
                             </span>
@@ -601,6 +670,10 @@ const AdminDashboard = () => {
                             ) : (
                               <Unlock className="w-3 h-3 text-slate-300" />
                             )}
+                          </div>
+                          <div className="text-[10px] text-slate-400 mb-1.5 truncate">
+                            <span className="font-bold">Assigned:</span>{" "}
+                            {getJudgeAssignmentLabel(judge)}
                           </div>
                           <div className="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
                             <div
@@ -724,15 +797,18 @@ const AdminDashboard = () => {
                             <div
                               className="h-full bg-blue-500 transition-all duration-500 rounded-full"
                               style={{
-                                width: `${(team.count / judges.length) * 100}%`,
+                                width: `${team.assignedJudgesCount > 0 ? (team.count / team.assignedJudgesCount) * 100 : 0}%`,
                               }}
                             />
                           </div>
                           <span
-                            className={`text-[10px] font-bold ${team.count === judges.length ? "text-green-500" : "text-slate-400"}`}
+                            className={`text-[10px] font-bold ${team.count === team.assignedJudgesCount ? "text-green-500" : "text-slate-400"}`}
                           >
-                            {team.count} / {judges.length} Judges
+                            {team.count} / {team.assignedJudgesCount} Judges
                           </span>
+                          <div className="text-[9px] text-slate-400 max-w-[150px] truncate text-center px-2">
+                            {team.assignedJudges.map((j) => j.name).join(", ")}
+                          </div>
                         </div>
                         <div className="col-span-1 md:col-span-2 text-right pr-6">
                           <div
