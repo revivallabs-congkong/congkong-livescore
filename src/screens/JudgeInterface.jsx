@@ -20,7 +20,6 @@ import {
   ToastMessage,
 } from "../components/ui";
 import { ConfirmSubmitModal, SignatureModal } from "../components/modals";
-import { CRITERIA } from "../data";
 
 const JudgeInterface = () => {
   const { t, lang } = useContext(AppContext);
@@ -79,7 +78,7 @@ const JudgeInterface = () => {
         cat.items.map((item) => ({ ...item, category: cat.id })),
       );
     }
-    return CRITERIA;
+    return [];
   }, [criteriaData]);
 
   // Filter teams by judge's assigned category
@@ -557,69 +556,53 @@ const JudgeInterface = () => {
               <div className="flex-1 overflow-y-auto p-6 pb-24 scroll-smooth">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className="space-y-6">
-                    {criteriaData.length > 0
-                      ? criteriaData.map((cat) => (
-                          <GlassCard key={cat.id} className="p-5">
-                            <div className="flex items-center gap-2 mb-4">
-                              <div
-                                className={`w-1 h-4 rounded-full ${cat.id === "cat_creativity" ? "bg-blue-500" : cat.id === "cat_market" ? "bg-purple-500" : "bg-amber-500"}`}
+                    {criteriaData.length > 0 ? (
+                      criteriaData.map((cat) => (
+                        <GlassCard key={cat.id} className="p-5">
+                          <div className="flex items-center gap-2 mb-4">
+                            <div
+                              className={`w-1 h-4 rounded-full ${cat.id === "cat_creativity" ? "bg-blue-500" : cat.id === "cat_market" ? "bg-purple-500" : "bg-amber-500"}`}
+                            />
+                            <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500">
+                              {lang === "en" ? cat.label_en : cat.label}
+                            </h3>
+                          </div>
+                          <div className="space-y-4">
+                            {cat.items.map((crit) => (
+                              <AppleSlider
+                                key={crit.id}
+                                label={
+                                  lang === "en" ? crit.label_en : crit.label
+                                }
+                                desc={crit.desc}
+                                max={crit.max}
+                                value={localScore[crit.id] || 0}
+                                onChange={(val) =>
+                                  handleScoreChange(crit.id, val)
+                                }
+                                disabled={isLocked}
                               />
-                              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500">
-                                {lang === "en" ? cat.label_en : cat.label}
-                              </h3>
-                            </div>
-                            <div className="space-y-4">
-                              {cat.items.map((crit) => (
-                                <AppleSlider
-                                  key={crit.id}
-                                  label={
-                                    lang === "en" ? crit.label_en : crit.label
-                                  }
-                                  desc={crit.desc}
-                                  max={crit.max}
-                                  value={localScore[crit.id] || 0}
-                                  onChange={(val) =>
-                                    handleScoreChange(crit.id, val)
-                                  }
-                                  disabled={isLocked}
-                                />
-                              ))}
-                            </div>
-                          </GlassCard>
-                        ))
-                      : Object.entries(
-                          CRITERIA.reduce((groups, c) => {
-                            if (!groups[c.category]) groups[c.category] = [];
-                            groups[c.category].push(c);
-                            return groups;
-                          }, {}),
-                        ).map(([category, items]) => (
-                          <GlassCard key={category} className="p-5">
-                            <div className="flex items-center gap-2 mb-4">
-                              <div className="w-1 h-4 rounded-full bg-slate-300" />
-                              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500">
-                                {t[category]}
-                              </h3>
-                            </div>
-                            <div className="space-y-4">
-                              {items.map((crit) => (
-                                <AppleSlider
-                                  key={crit.id}
-                                  label={
-                                    lang === "en" ? crit.label_en : crit.label
-                                  }
-                                  desc={crit.desc}
-                                  max={crit.max}
-                                  value={localScore[crit.id] || 0}
-                                  onChange={(val) =>
-                                    handleScoreChange(crit.id, val)
-                                  }
-                                  disabled={isLocked}
-                                />
-                              ))}
-                            </div>
-                          </GlassCard>
-                        ))}
+                            ))}
+                          </div>
+                        </GlassCard>
+                      ))
+                    ) : (
+                      <GlassCard className="p-8 text-center">
+                        <div className="text-slate-400">
+                          <PenTool className="w-8 h-8 mx-auto mb-3 opacity-50" />
+                          <p className="font-semibold text-sm text-slate-500">
+                            {lang === "en"
+                              ? "No evaluation criteria configured"
+                              : "평가 기준이 설정되지 않았습니다"}
+                          </p>
+                          <p className="text-xs mt-1">
+                            {lang === "en"
+                              ? "Please contact the administrator."
+                              : "관리자에게 문의해주세요."}
+                          </p>
+                        </div>
+                      </GlassCard>
+                    )}
                   </div>
 
                   <div className="space-y-6">

@@ -140,6 +140,12 @@ export const DataProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
+    console.log(
+      "Current Auth State:",
+      user ? user.uid : "null",
+      "appId:",
+      appId,
+    );
     // if (!user) return; // Allow loading initial data even if auth is establishing (anonymous)
 
     // Track loading state for initial data fetch
@@ -730,8 +736,6 @@ export const DataProvider = ({ children }) => {
     onUpdateEventSettings: handleUpdateEventSettings,
     onSubmitScore: handleSubmitScore,
     onControlUpdate: handleControlUpdate,
-    onGlobalLock: handleGlobalLock,
-    onJudgeUnlock: handleJudgeUnlock,
     onGlobalLock: handleGlobalLock,
     onJudgeUnlock: handleJudgeUnlock,
     onSystemReset: handleSystemReset,
